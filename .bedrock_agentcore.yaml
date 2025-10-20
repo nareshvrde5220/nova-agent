@@ -1,0 +1,30 @@
+default_agent: policygeneration
+agents:
+  policygeneration:
+    name: policygeneration
+    entrypoint: agentcore_main.py
+    platform: linux/arm64
+    container_runtime: none
+    aws:
+      execution_role: arn:aws:iam::121409194654:role/AmazonBedrockAgentCoreSDKRuntime-us-east-1-22ef9aeca1
+      execution_role_auto_create: false
+      account: '121409194654'
+      region: us-east-1
+      ecr_repository: 121409194654.dkr.ecr.us-east-1.amazonaws.com/bedrock-agentcore-policygeneration
+      ecr_auto_create: false
+      network_configuration:
+        network_mode: PUBLIC
+      protocol_configuration:
+        server_protocol: HTTP
+      observability:
+        enabled: true
+    bedrock_agentcore:
+      agent_id: policygeneration-QRMsgK96SO
+      agent_arn: arn:aws:bedrock-agentcore:us-east-1:121409194654:runtime/policygeneration-QRMsgK96SO
+      agent_session_id: 0b5132fc-aa56-4eed-a5fe-5390072d0862
+    codebuild:
+      project_name: bedrock-agentcore-policygeneration-builder
+      execution_role: arn:aws:iam::121409194654:role/AmazonBedrockAgentCoreSDKCodeBuild-us-east-1-22ef9aeca1
+      source_bucket: bedrock-agentcore-codebuild-sources-121409194654-us-east-1
+    authorizer_configuration: null
+    oauth_configuration: null

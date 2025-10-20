@@ -1,0 +1,10 @@
+run.py
+nova_sonic_underwriting.py
+templates/
+static/
+index.html
+*.html
+__pycache__/
+.env
+uploads/
+sessions/
