@@ -1,0 +1,962 @@
+{% include "header.html" %}
+<style>
+  .modal-backdrop {
+    z-index: 99998 !important;
+  }
+  #summaryModal {
+    z-index: 99999 !important;
+  }
+  #summaryModal .modal-dialog {
+    z-index: 99999 !important;
+  }
+</style>
+<div class="com-md-12 chat-body nyl-bg">
+  <div class="row p-0 m-0">
+    <div
+      class="col-md-9 col-sm-9 col-xs-12 collapse chat-intro"
+      id="collapseExample"
+    >
+      <div class="row">
+        <div class="col-md-4 col-sm-4 col-xs-12 chatbot-intro-card">
+          <video
+            src="/static/images/agentloop.mp4"
+            class="img-fluid agent-video"
+            autoplay
+            muted
+            loop
+            playsinline
+            disablePictureInPicture
+            controlsList="nodownload nofullscreen noremoteplayback"
+          ></video>
+
+          <div class="controls mt-3">
+            <button class="btn btn-primary" id="startSessionBtn">
+              Start Conversation
+            </button>
+            <button class="mic-button btn" id="micBtn" disabled>🎤</button>
+            <button class="btn btn-secondary" id="endSessionBtn" disabled>
+              End Conversation
+            </button>
+          </div>
+          <audio id="audioPlayer" class="audio-player" autoplay></audio>
+        </div>
+
+        <div class="col-md-4 col-sm-4 col-xs-12">
+          <div class="col-md-12 col-sm-12 col-xs-12 chat-box" id="chatBox">
+            <div class="col-md-12 chat-list">
+              <div class="hstack gap-3 chat-head align-items-center">
+                <div class="p-2">
+                  <img
+                    src="{{ url_for('static', filename='images/Codnifylight.png') }}"
+                    class="chat-logo"
+                    alt="Chat Head"
+                  />
+                </div>
+                <div class="p-2">
+                  <h5 class="chat-title mb-0">Health Insurance</h5>
+                </div>
+              </div>
+              <ul class="list-unstyled">
+                <li class="d-flex justify-content-between mb-4"></li>
+              </ul>
+            </div>
+            <div class="col-md-12 chat-input sticky-bottom"></div>
+          </div>
+        </div>
+
+        <div
+          class="col-md-4 col-sm-4 col-xs-12 analysis-container"
+          id="analysisContainer"
+        >
+          <div
+            class="offcanvas offcanvas-end agent-process"
+            id="stepOffcanvas"
+            tabindex="-1"
+            aria-labelledby="stepOffcanvasLabel"
+          >
+            <div class="offcanvas-header">
+              <h5 class="offcanvas-title" id="stepOffcanvasLabel">
+                Support Document
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="offcanvas"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="offcanvas-body">
+              <div id="stepAccordion" class="accordion">
+                <div class="upload-div"></div>
+                <div class="process-div"></div>
+                <div class="steps-div" id="stepsDiv"></div>
+              </div>
+              <!-- Added Buttons Section -->
+              <div class="d-flex justify-content-between mt-3">
+                <button
+                  id="viewSummaryBtn"
+                  class="btn btn-outline-primary w-50 me-2"
+                >
+                  <i class="bi bi-eye me-1"></i> View Summary
+                </button>
+                <button id="getPolicyBtn" class="btn btn-outline-primary w-50 ms-2">
+                  <i class="bi bi-file-earmark-text me-1"></i> Get Policy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button
+      class="chat-invoke-btn"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#collapseExample"
+      aria-expanded="false"
+      aria-controls="collapseExample"
+    >
+      <img
+        src="{{ url_for('static', filename='images/screenone.png') }}"
+        class="img-fluid"
+      />
+    </button>
+  </div>
+</div>
+
+<!-- Summary Modal -->
+<!-- Summary Modal -->
+<div class="modal fade" id="summaryModal" tabindex="-1" aria-labelledby="summaryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="summaryModalLabel">
+          <i class="bi bi-file-text me-2"></i>Underwriting Summary Report
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="summaryModalBody">
+        <!-- Summary content will be loaded here -->
+        <div class="text-center text-muted">
+          <p>Summary content will appear here...</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="printSummaryBtn">
+          <i class="bi bi-printer me-1"></i>Print Summary
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
+<script>
+  const socket = io();
+  const chatContainer = document.getElementById("chatContainer");
+  const micBtn = document.getElementById("micBtn");
+  const startSessionBtn = document.getElementById("startSessionBtn");
+  const endSessionBtn = document.getElementById("endSessionBtn");
+  const audioPlayer = document.getElementById("audioPlayer");
+  const chatBox = document.getElementById("chatBox");
+
+  let isRecording = false;
+  let isSessionActive = false;
+  let currentSessionId = null;
+  let final_summary = null;
+
+  socket.on("connect", () => {
+    console.log("[SOCKET] Connected to server");
+    startSessionBtn.disabled = false;
+  });
+
+  socket.on("disconnect", () => {
+    console.log("[SOCKET] Disconnected from server");
+    resetUI();
+  });
+
+  socket.on("nova_session_started", (data) => {
+    isSessionActive = true;
+    currentSessionId = data.session_id;
+    console.log("[INFO] Nova session started:", currentSessionId);
+
+    chatBox.classList.add("active");
+
+    micBtn.disabled = false;
+    startSessionBtn.disabled = true;
+    endSessionBtn.disabled = false;
+
+    if (!isRecording) {
+      setTimeout(() => {
+        micBtn.click();
+      }, 500);
+    }
+  });
+
+  socket.on("assistant_message", function (data) {
+    console.log("Assistant message received:", data.text);
+    appendReplyMessage(data.text);
+  });
+
+  socket.on("user_message", (data) => {
+    appendUserMessage(data.text);
+  });
+
+  socket.on("audio_output", (data) => {
+    playAudio(data.audio);
+  });
+
+  socket.on("error", (data) => {
+    appendReplyMessage(`Error: ${data.message}`);
+  });
+
+  socket.on("nova_session_stopped", () => {
+    resetUI();
+  });
+
+  socket.on("upload_link", function (data) {
+    currentSessionId = data.session_id;
+    console.log("[INFO] Upload link received for session:", currentSessionId);
+
+    // **NEW: End Nova Sonic session immediately**
+    console.log("[INFO] Ending Nova Sonic session as upload panel is opening");
+    if (isSessionActive) {
+      socket.emit("end_nova_session");
+      resetUI();
+      appendReplyMessage("✅ Voice conversation ended. Please upload your documents to continue.");
+    }
+
+    const canvasBody = document.querySelector(".upload-div");
+    canvasBody.innerHTML = "";
+
+    const uploadBtn = document.createElement("button");
+    uploadBtn.textContent = "Upload Documents (ZIP)";
+    uploadBtn.className = "btn btn-success w-100";
+
+    const fileUploadInput = document.createElement("input");
+    fileUploadInput.type = "file";
+    fileUploadInput.accept = ".zip";
+    fileUploadInput.style.display = "none";
+
+    uploadBtn.onclick = () => {
+      fileUploadInput.click();
+
+      fileUploadInput.onchange = async () => {
+        if (fileUploadInput.files.length === 0) return;
+
+        const statusDiv = document.createElement("div");
+        statusDiv.textContent = "Uploading ZIP file...";
+        statusDiv.className = "text-primary mt-3 text-center";
+        canvasBody.appendChild(statusDiv);
+
+        const formData = new FormData();
+        formData.append("zipFileInput", fileUploadInput.files[0]);
+
+        try {
+          const response = await fetch(`/upload/${currentSessionId}`, {
+            method: "POST",
+            body: formData,
+          });
+
+          if (response.ok) {
+            statusDiv.textContent =
+              "ZIP file uploaded successfully. Starting 8-agent processing...";
+            statusDiv.className = "text-success mt-3 text-center";
+
+            socket.emit("files_uploaded", { session_id: currentSessionId });
+            waitForAgentStatus(currentSessionId);
+          } else {
+            statusDiv.textContent = "Upload failed. Please try again.";
+            statusDiv.className = "text-danger mt-3 text-center";
+          }
+        } catch (err) {
+          statusDiv.textContent = "Upload error. Please check your connection.";
+          statusDiv.className = "text-danger mt-3 text-center";
+        }
+
+        fileUploadInput.value = "";
+      };
+    };
+
+    canvasBody.appendChild(uploadBtn);
+    canvasBody.appendChild(fileUploadInput);
+
+    const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(
+      document.getElementById("stepOffcanvas")
+    );
+    offcanvas.show();
+  });
+
+  socket.on("policy_generated", function (data) {
+    console.log("[POLICY] Policy generated:", data);
+
+    const policyDiv = document.createElement("div");
+    policyDiv.className = "alert alert-success mt-3 text-center";
+    policyDiv.innerHTML = `
+        <i class="bi bi-file-earmark-word-fill text-success me-2 fs-4"></i>
+        <strong>Health Insurance Policy Generated</strong><br>
+        <small>Policy Number: ${data.policy_number}</small><br>
+        <small class="text-muted">Click "Get Policy" button to download and view</small>
+    `;
+
+    document
+      .querySelector("#stepOffcanvas .offcanvas-body")
+      .appendChild(policyDiv);
+
+    appendReplyMessage(`
+        <div class="policy-download-box p-3 border rounded mt-2" style="background-color: #f0f8ff;">
+            <h6 class="text-success"><i class="bi bi-check-circle-fill"></i> Policy Generated Successfully!</h6>
+            <p class="mb-2"><strong>Policy Number:</strong> ${data.policy_number}</p>
+            <p class="mb-0"><small class="text-muted">Click the "Get Policy" button in the side panel to download and view your policy.</small></p>
+        </div>
+    `);
+  });
+
+  function waitForAgentStatus(sessionId, maxAttempts = 60, delay = 3000) {
+    let attempts = 0;
+    let lastProcessedSteps = new Set();
+    let isProcessingComplete = false;
+
+    const $canvasBody = $(".process-div");
+    $canvasBody.html(`
+            <div id="loadingVideoWrapper">
+                <video autoplay muted loop playsinline style="width: 100%; margin: 0 auto; display: block;">
+                    <source src="/static/images/process.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <p class="text-center mt-2">Processing your documents...</p>
+            </div>
+        `);
+
+    const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(
+      document.getElementById("stepOffcanvas")
+    );
+    offcanvas.show();
+
+    function checkStatusFile() {
+      const url = `/status/${sessionId}`;
+      console.log(`[INFO] Checking agent status (attempt ${attempts + 1})`);
+
+      fetch(url)
+        .then((res) => {
+          if (!res.ok) throw new Error("Status file not ready");
+          return res.json();
+        })
+        .then((json) => {
+          const agentData = json.agents || {};
+
+          const agentNames = [
+            "data_intake",
+            "document_verification",
+            "medical_risk_assessment",
+            "financial",
+            "driving",
+            "compliance",
+            "lifestyle_behavioral",
+            "summary_generation",
+          ];
+
+          const stepData = agentNames.map((agentName, index) => {
+            const agent = agentData[agentName] || {};
+            return {
+              step: formatAgentName(agentName),
+              status: agent.status || "pending",
+              description: getAgentDescription(agentName),
+              result_summary: agent.analysis
+                ? agent.analysis.substring(0, 100) + "..."
+                : "",
+              timestamp: agent.timestamp || "",
+            };
+          });
+
+          if (stepData.length > 0) {
+            if ($("#loadingVideoWrapper").length > 0) {
+              $("#loadingVideoWrapper").remove();
+              initializeStepsAccordion(stepData);
+            }
+
+            stepData.forEach((step, index) => {
+              const stepKey = `${step.step}_${index}`;
+              if (
+                !lastProcessedSteps.has(stepKey) ||
+                hasStepStatusChanged(step, index)
+              ) {
+                updateStepUI(step, index);
+                lastProcessedSteps.add(stepKey);
+              }
+            });
+
+            const allCompleted = stepData.every(
+              (step) => step.status === "completed"
+            );
+
+            if (allCompleted && !isProcessingComplete) {
+              isProcessingComplete = true;
+              const summaryAgent = agentData["summary_generation"] || {};
+              final_summary = summaryAgent.analysis || "";
+
+              setTimeout(() => {
+                addFinalResultToUI({
+                  status: "COMPLETED",
+                  message: "analysis completed successfully",
+                });
+
+                // Store summary but DON'T display it in chat
+                // Just notify user it's ready
+                if (final_summary) {
+                  appendReplyMessage("✅ <strong>Underwriting analysis completed!</strong><br><small>Click 'View Summary' button to see the full report.</small>");
+                  
+                  // Scroll to last message
+                  const $chatList = $(".chat-list");
+                  $chatList.animate(
+                    {
+                      scrollTop: $chatList.prop("scrollHeight")
+                    },
+                    1000
+                  );
+                }
+              }, 1000);
+
+              return;
+            }
+          }
+
+          if (!isProcessingComplete) {
+            attempts++;
+            if (attempts < maxAttempts) {
+              setTimeout(checkStatusFile, delay);
+            } else {
+              console.error("Agent status file not ready after max attempts.");
+              $canvasBody.html(
+                `<div class="text-danger text-center mt-4 fw-bold">Error: Processing took too long or failed.</div>`
+              );
+            }
+          }
+        })
+        .catch(() => {
+          attempts++;
+          if (attempts < maxAttempts) {
+            setTimeout(checkStatusFile, delay);
+          } else {
+            console.error("Agent status file not ready after max attempts.");
+            if ($("#loadingVideoWrapper").length > 0) {
+              $canvasBody.html(
+                `<div class="text-danger text-center mt-4 fw-bold">Error: Processing took too long or failed.</div>`
+              );
+            }
+          }
+        });
+    }
+
+    checkStatusFile();
+  }
+
+  function formatAgentName(agentName) {
+    const nameMap = {
+      data_intake: "Data Intake Agent",
+      document_verification: "Document Verification Agent",
+      medical_risk_assessment: "Medical Risk Assessment Agent",
+      financial: "Financial Analysis Agent",
+      driving: "Driving Record Analysis Agent",
+      compliance: "Compliance Verification Agent",
+      lifestyle_behavioral: "Lifestyle & Behavioral Analysis Agent",
+      summary_generation: "Summary Generation Agent",
+    };
+    return (
+      nameMap[agentName] ||
+      agentName.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+    );
+  }
+
+  function getAgentDescription(agentName) {
+    const descriptions = {
+      data_intake:
+        "Extract customer information and policy details using Nova Pro.",
+      document_verification: "Validate document completeness and authenticity.",
+      medical_risk_assessment: "Assess medical risks and health conditions.",
+      financial: "Analyze financial capacity and coverage appropriateness.",
+      driving: "Evaluate driving records and motor vehicle history.",
+      compliance:
+        "Verify regulatory compliance and documentation requirements.",
+      lifestyle_behavioral: "Analyze lifestyle and behavioral risk factors.",
+      summary_generation: "Generate comprehensive summary.",
+    };
+    return descriptions[agentName] || "Processing...";
+  }
+
+  function initializeStepsAccordion(stepData) {
+    let container = document.getElementById("stepsDiv");
+
+    if (!container) {
+      const accordionDiv = document.createElement("div");
+      accordionDiv.id = "stepsDiv";
+      accordionDiv.className = "accordion";
+      document.querySelector(".steps-div").appendChild(accordionDiv);
+      container = accordionDiv;
+    }
+
+    container.innerHTML = "";
+
+    stepData.forEach((item, index) => {
+      const stepId = `step${index}`;
+      const collapseId = `collapse${index}`;
+      const isFirst = index === 0;
+
+      container.innerHTML += `
+                <div class="accordion-item">
+                    <h2 class="accordion-header d-flex justify-content-between align-items-center" id="${stepId}">
+                        <button class="accordion-button ${
+                          !isFirst ? "collapsed" : ""
+                        }" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${isFirst}" aria-controls="${collapseId}">
+                            <span class="me-2 icon-wrapper">
+                                <i id="tick-${index}" class="bi bi-check-circle text-secondary fs-4"></i>
+                            </span>
+                            <span id="step-label-${index}">${item.step}</span>
+                        </button>
+                    </h2>
+                    <div id="${collapseId}" class="accordion-collapse collapse ${
+        isFirst ? "show" : ""
+      }"
+                        aria-labelledby="${stepId}" data-bs-parent="#stepAccordion">
+                        <div class="accordion-body" id="desc-${index}">
+                            ${item.description}
+                        </div>
+                    </div>
+                </div>
+            `;
+    });
+  }
+
+  function hasStepStatusChanged(step, index) {
+    const currentIcon = document.getElementById(`tick-${index}`);
+    if (!currentIcon) return true;
+
+    const currentStatus = step.status;
+    const hasWarningClass = currentIcon.classList.contains("text-warning");
+    const hasSuccessClass = currentIcon.classList.contains("text-success");
+    const hasDangerClass = currentIcon.classList.contains("text-danger");
+
+    if (currentStatus === "in_progress" && !hasWarningClass) return true;
+    if (currentStatus === "completed" && !hasSuccessClass) return true;
+    if (currentStatus === "failed" && !hasDangerClass) return true;
+
+    return false;
+  }
+
+  function updateStepUI(step, index) {
+    const tick = document.getElementById(`tick-${index}`);
+    const label = document.getElementById(`step-label-${index}`);
+    const desc = document.getElementById(`desc-${index}`);
+    const collapseElement = document.getElementById(`collapse${index}`);
+
+    if (!tick || !label || !desc) return;
+
+    if (step.status === "in_progress" || step.status === "running") {
+      tick.className = "bi bi-arrow-repeat text-warning fs-4";
+      label.innerHTML = `${step.step} <span class="spinner-border spinner-border-sm text-warning ms-2" role="status"></span>`;
+
+      if (collapseElement) {
+        const collapse = new bootstrap.Collapse(collapseElement, {
+          show: true,
+        });
+      }
+
+      if (index > 0) {
+        const prevCollapse = document.getElementById(`collapse${index - 1}`);
+        if (prevCollapse) {
+          const prevCollapseInstance =
+            bootstrap.Collapse.getInstance(prevCollapse);
+          if (prevCollapseInstance) prevCollapseInstance.hide();
+        }
+      }
+    } else if (step.status === "completed") {
+      tick.className = "bi bi-check-circle text-success fs-4";
+      label.textContent = step.step;
+
+      if (step.result_summary) {
+        desc.innerHTML = `
+                    <div class="mb-2">${step.description}</div>
+                    <div class="text-success"><small><strong>Completed:</strong> ${step.result_summary}</small></div>
+                `;
+      } else {
+        desc.innerHTML = step.description;
+      }
+    } else if (step.status === "failed") {
+      tick.className = "bi bi-x-circle text-danger fs-4";
+      label.innerHTML = `${step.step} <span class="text-danger">(Failed)</span>`;
+
+      if (step.result_summary) {
+        desc.innerHTML = `
+                    <div class="mb-2">${step.description}</div>
+                    <div class="text-danger"><small><strong>Error:</strong> ${step.result_summary}</small></div>
+                `;
+      }
+    } else {
+      tick.className = "bi bi-check-circle text-secondary fs-4";
+      label.textContent = step.step;
+      desc.innerHTML = step.description;
+    }
+  }
+
+  function addFinalResultToUI(finalResult) {
+    if (document.querySelector(".result-block")) return;
+
+    const summaryDiv = document.createElement("div");
+    summaryDiv.className = "alert mt-4 text-center fw-bold result-block";
+
+    if (finalResult.status === "COMPLETED") {
+      summaryDiv.classList.add("alert-success");
+      summaryDiv.innerHTML =
+        '<i class="bi bi-check-circle-fill text-success me-2 fs-4"></i> ' +
+        "UNDERWRITING ANALYSIS COMPLETED";
+
+      const policyNote = document.createElement("p");
+      policyNote.className = "mt-2 mb-0";
+      policyNote.innerHTML =
+        "<small>Policy document is being generated...</small>";
+      summaryDiv.appendChild(policyNote);
+    } else {
+      summaryDiv.classList.add("alert-info");
+      summaryDiv.innerHTML =
+        '<i class="bi bi-info-circle-fill text-info me-2 fs-4"></i> ' +
+        finalResult.status;
+    }
+
+    document
+      .querySelector("#stepOffcanvas .offcanvas-body")
+      .appendChild(summaryDiv);
+  }
+
+  function resetUI() {
+    isRecording = false;
+    isSessionActive = false;
+    micBtn.classList.remove("recording");
+    micBtn.disabled = true;
+    startSessionBtn.disabled = false;
+    endSessionBtn.disabled = true;
+    chatBox.classList.remove("active");
+    clearAudioQueue();
+  }
+
+  const audioQueue = [];
+  let isPlaying = false;
+
+  function playAudio(base64Audio) {
+    const audioBlob = base64ToBlob(base64Audio, "audio/wav");
+    audioQueue.push(audioBlob);
+
+    if (!isPlaying) {
+      playNextAudio();
+    }
+  }
+
+  function playNextAudio() {
+    if (audioQueue.length === 0) {
+      isPlaying = false;
+      return;
+    }
+
+    isPlaying = true;
+    const nextAudioBlob = audioQueue.shift();
+    const audioUrl = URL.createObjectURL(nextAudioBlob);
+
+    audioPlayer.src = audioUrl;
+    audioPlayer.play().catch((e) => {
+      console.error("Audio play failed:", e);
+      isPlaying = false;
+    });
+
+    audioPlayer.onended = () => {
+      URL.revokeObjectURL(audioUrl);
+      playNextAudio();
+    };
+  }
+
+  function clearAudioQueue() {
+    audioQueue.length = 0;
+    isPlaying = false;
+    audioPlayer.pause();
+    audioPlayer.src = "";
+  }
+
+  function base64ToBlob(base64, mimeType) {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
+  }
+
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const audioContext = new AudioContext({ sampleRate: 16000 });
+      const source = audioContext.createMediaStreamSource(stream);
+      const processor = audioContext.createScriptProcessor(4096, 1, 1);
+
+      processor.onaudioprocess = function (e) {
+        if (isRecording) {
+          const inputData = e.inputBuffer.getChannelData(0);
+          const int16Data = new Int16Array(inputData.length);
+          for (let i = 0; i < inputData.length; i++) {
+            int16Data[i] = Math.max(
+              -32768,
+              Math.min(32767, inputData[i] * 32768)
+            );
+          }
+          const arrayBuffer = int16Data.buffer;
+          const base64Audio = btoa(
+            String.fromCharCode(...new Uint8Array(arrayBuffer))
+          );
+          socket.emit("audio_data", { audio: base64Audio });
+        }
+      };
+
+      source.connect(processor);
+      processor.connect(audioContext.destination);
+      window.audioStream = stream;
+      window.audioContext = audioContext;
+      window.audioProcessor = processor;
+      socket.emit("start_recording");
+    } catch (error) {
+      console.error("Error starting recording:", error);
+      appendReplyMessage("Error: Microphone access issue.");
+    }
+  }
+
+  function stopRecording() {
+    if (window.audioStream)
+      window.audioStream.getTracks().forEach((track) => track.stop());
+    if (window.audioProcessor) window.audioProcessor.disconnect();
+    if (window.audioContext) window.audioContext.close();
+    window.audioStream = null;
+    window.audioContext = null;
+    window.audioProcessor = null;
+    socket.emit("stop_recording");
+  }
+
+  startSessionBtn.addEventListener("click", () => {
+    console.log("[USER] Start Conversation button clicked");
+    socket.emit("start_nova_session");
+    appendReplyMessage("Starting conversation with Alan...");
+  });
+
+  endSessionBtn.addEventListener("click", () => {
+    console.log("[USER] End Conversation button clicked");
+    if (isRecording) stopRecording();
+    socket.emit("end_nova_session");
+    resetUI();
+    appendReplyMessage("Conversation ended.");
+  });
+
+  micBtn.addEventListener("click", () => {
+    if (!isSessionActive) return;
+    if (!isRecording) {
+      startRecording();
+      isRecording = true;
+      micBtn.classList.add("recording");
+      micBtn.textContent = "⏹️";
+    } else {
+      stopRecording();
+      isRecording = false;
+      micBtn.classList.remove("recording");
+      micBtn.textContent = "🎤";
+    }
+  });
+
+  // View Summary Button Handler
+  document.getElementById('viewSummaryBtn').addEventListener('click', function() {
+    if (!final_summary) {
+      alert('Summary not yet generated. Please wait for processing to complete.');
+      return;
+    }
+    
+    // Load summary into modal
+    document.getElementById('summaryModalBody').innerHTML = final_summary;
+    
+    // Show modal
+    const summaryModal = new bootstrap.Modal(document.getElementById('summaryModal'));
+    summaryModal.show();
+  });
+
+  // Print Summary Button Handler
+  document.getElementById('printSummaryBtn').addEventListener('click', function() {
+    const printContent = document.getElementById('summaryModalBody').innerHTML;
+    const printWindow = window.open('', '', 'height=600,width=800');
+    printWindow.document.write('<html><head><title>Underwriting Summary Report</title>');
+    printWindow.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">');
+    printWindow.document.write('<style>body { padding: 20px; } table { margin-bottom: 20px; }</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(printContent);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
+  });
+
+  
+  document.getElementById('getPolicyBtn').addEventListener('click', function() {
+    console.log('[DEBUG] Get Policy clicked');
+    console.log('[DEBUG] Current session ID:', currentSessionId);
+    
+    if (!currentSessionId) {
+      alert('No active session found. Please complete the underwriting process first.');
+      return;
+    }
+    
+    // First, check if policy is available
+    fetch(`/policy_status/${currentSessionId}`)
+      .then(response => {
+        console.log('[DEBUG] Policy status response:', response.status);
+        return response.json();
+      })
+      .then(data => {
+        console.log('[DEBUG] Policy status data:', data);
+        if (data.status === 'success' && data.policy_generated) {
+          // Policy is available, proceed with download and open
+          const downloadUrl = `/download_policy/${currentSessionId}`;
+          
+          // Download the file locally
+          const downloadLink = document.createElement('a');
+          downloadLink.href = downloadUrl;
+          downloadLink.download = `policy_${currentSessionId}.pdf`;
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+          
+          // Open in new tab immediately
+          window.open(`/view_policy/${currentSessionId}`, '_blank');
+          
+          // Show success message in chat
+          appendReplyMessage(`
+            <div class="alert alert-success mt-2">
+              <i class="bi bi-download me-1"></i>
+              Policy downloaded and opened in a new tab!
+            </div>
+          `);
+        } else {
+          alert('Policy document is not yet available. Please wait for processing to complete.');
+        }
+      })
+      .catch(error => {
+        console.error('[ERROR] Error checking policy status:', error);
+        appendReplyMessage(`
+          <div class="alert alert-danger mt-2">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            Error: ${error.message}. Check console for details.
+          </div>
+        `);
+      });
+  });
+
+  function appendUserMessage(message) {
+    const $chatContainer = $(".chat-list ul");
+
+    const $li = $("<li>").addClass("d-flex justify-content-end mb-4");
+    const $card = $("<div>").addClass("card w-100");
+    const $cardBody = $("<div>").addClass("card-body");
+    const $p = $("<p>").addClass("mb-0").text(message);
+
+    const loaderSVG = `
+            <svg class="chat-load" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                <g transform="translate(20 50)">
+                    <circle cx="0" cy="0" r="6" fill="#000000">
+                        <animateTransform attributeName="transform" type="scale" begin="-0.375s"
+                            calcMode="spline" keySplines="0.3 0 0.7 1;0.3 0 0.7 1"
+                            values="0;1;0" keyTimes="0;0.5;1" dur="1s" repeatCount="indefinite" />
+                    </circle>
+                </g>
+                <g transform="translate(40 50)">
+                    <circle cx="0" cy="0" r="6" fill="#72cbfd">
+                        <animateTransform attributeName="transform" type="scale" begin="-0.25s"
+                            calcMode="spline" keySplines="0.3 0 0.7 1;0.3 0 0.7 1"
+                            values="0;1;0" keyTimes="0;0.5;1" dur="1s" repeatCount="indefinite" />
+                    </circle>
+                </g>
+                <g transform="translate(60 50)">
+                    <circle cx="0" cy="0" r="6" fill="#0079c2">
+                        <animateTransform attributeName="transform" type="scale" begin="-0.125s"
+                            calcMode="spline" keySplines="0.3 0 0.7 1;0.3 0 0.7 1"
+                            values="0;1;0" keyTimes="0;0.5;1" dur="1s" repeatCount="indefinite" />
+                    </circle>
+                </g>
+                <g transform="translate(80 50)">
+                    <circle cx="0" cy="0" r="6" fill="#ff6600">
+                        <animateTransform attributeName="transform" type="scale" begin="0s"
+                            calcMode="spline" keySplines="0.3 0 0.7 1;0.3 0 0.7 1"
+                            values="0;1;0" keyTimes="0;0.5;1" dur="1s" repeatCount="indefinite" />
+                    </circle>
+                </g>
+            </svg>`;
+
+    const $loader = $(loaderSVG).addClass("chat-loader");
+
+    const $avatar = $("<img>", {
+      src: "/static/images/chatbotava.png",
+      alt: "avatar",
+      width: 60,
+      class: "rounded-circle d-flex align-self-start ms-3 shadow-1-strong",
+    });
+
+    $cardBody.append($p, $loader);
+    $card.append($cardBody);
+    $li.append($card, $avatar);
+    $chatContainer.append($li);
+    $chatContainer.scrollTop($chatContainer[0].scrollHeight);
+    setTimeout(() => {
+      removeUserLoader();
+    }, 2000);
+  }
+
+  function removeUserLoader() {
+    const $loader = $(".chat-list ul li .chat-loader").last();
+    $loader.fadeOut(300, function () {
+      $loader.remove();
+    });
+  }
+
+  function appendReplyMessage(reply) {
+    const chatContainer = document.querySelector(".chat-list ul");
+
+    const li = document.createElement("li");
+    li.className = "d-flex justify-content-start mb-4";
+
+    const avatar = document.createElement("img");
+    avatar.src = "/static/images/Chatbotava.png";
+    avatar.alt = "avatar";
+    avatar.className =
+      "rounded-circle d-flex align-self-start me-3 shadow-1-strong";
+    avatar.width = 60;
+
+    const card = document.createElement("div");
+    card.className = "card chat-reply-box w-100";
+
+    const cardBody = document.createElement("div");
+    cardBody.className = "card-body";
+
+    const p = document.createElement("p");
+    p.className = "mb-0";
+    p.innerHTML = reply;
+
+    cardBody.appendChild(p);
+    card.appendChild(cardBody);
+
+    li.appendChild(avatar);
+    li.appendChild(card);
+    chatContainer.appendChild(li);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    jQuery(".chat-list").animate(
+      { scrollTop: $(".chat-list").prop("scrollHeight") },
+      1000
+    );
+    jQuery("#collapseExample").collapse("show");
+  }
+</script>
