@@ -1,5 +1,5 @@
-# 🧠 AI-Powered Insurance Front Door
-### Smart Document Intelligence System for Automated Policy Generation  
+# 🧠 Agentic AI Based Policy Agent
+
 **Team Name:**  Trianz D&AI Innovation Factory
 **Solution Name:** Agentic AI Based Policy Agent  
 **Version:** 1.0.0  
