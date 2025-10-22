@@ -1,782 +1,878 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NYL Underwriting - Modern UI</title>
-    
+
     <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
     <!-- Jost Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link
+      href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
     <style>
-        :root {
-            --brand-primary: #0062E6;
-            --brand-blue: #0062E6;
-            --accent: #ff7a00;
-            --primary-gradient: linear-gradient(89.88deg, #db05e7 0.11%, #3545d9 45.01%, #0e8bd9 99.89%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --text-primary: #2c3e50;
-            --text-secondary: #7f8c8d;
+      :root {
+        --brand-primary: #0062e6;
+        --brand-blue: #0062e6;
+        --accent: #ff7a00;
+        --primary-gradient: linear-gradient(
+          89.88deg,
+          #db05e7 0.11%,
+          #3545d9 45.01%,
+          #0e8bd9 99.89%
+        );
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --text-primary: #2c3e50;
+        --text-secondary: #7f8c8d;
+      }
+
+      * {
+        font-family: "Jost", sans-serif;
+      }
+
+      body {
+        /* background: linear-gradient(89.88deg, rgba(219, 5, 231, 0.8) 0.11%, rgba(53, 69, 217, 0.8) 45.01%, rgba(14, 139, 217, 0.8) 99.89%), url('/static/images/bg.jpeg'); */
+        background: url("{{ url_for('static', filename='images/bg.jpeg') }}");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+      }
+
+      .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
+
+      .main-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .chat-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        max-width: 1200px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        border-radius: 10px;
+      }
+
+      .chat-header {
+        background: #1284d9;
+        color: white;
+        padding: 25px;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+      }
+
+      .chat-header h1 {
+        font-weight: 700;
+        margin: 0;
+        font-size: 2.5rem;
+      }
+
+      .chat-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+      }
+
+      .video-section {
+        padding: 30px;
+        text-align: center;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      }
+
+      .agent-video {
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        max-width: 100%;
+        height: auto;
+      }
+
+      .controls {
+        margin-top: 25px;
+        flex-wrap: nowrap !important;
+      }
+
+      .btn-modern {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 23px;
+        padding: 3px 25px;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 98, 230, 0.3);
+        margin: 5px;
+      }
+
+      .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 98, 230, 0.4);
+        color: white;
+      }
+
+      .btn-modern:disabled {
+        opacity: 0.6;
+        transform: none;
+        box-shadow: 0 4px 15px rgba(0, 98, 230, 0.2);
+      }
+
+      .mic-button {
+        background: var(--secondary-gradient);
+        border-radius: 23%;
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+      }
+
+      .mic-button.recording {
+        background: var(--success-gradient);
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
         }
-        
-        * {
-            font-family: 'Jost', sans-serif;
+        50% {
+          transform: scale(1.1);
         }
-        
-        body {
-            /* background: linear-gradient(89.88deg, rgba(219, 5, 231, 0.8) 0.11%, rgba(53, 69, 217, 0.8) 45.01%, rgba(14, 139, 217, 0.8) 99.89%), url('/static/images/bg.jpeg'); */
-            background: url('/static/images/bg.jpeg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
+        100% {
+          transform: scale(1);
         }
-        
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
+
+      .chat-box {
+        background: white;
+        border-radius: 20px;
+        margin: 2% 0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      }
+
+      .chat-head {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+      }
+
+      .chat-logo {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 15px;
+      }
+
+      .chat-title {
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .chat-list {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 20px;
+        max-height: calc(100vh - 200px);
+      }
+
+      .chat-list ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .chat-message {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: flex-start;
+      }
+
+      .chat-message.user {
+        justify-content: flex-end;
+      }
+
+      .message-card {
+        background: #f8f9fa;
+        border-radius: 20px;
+        padding: 15px 20px;
+        max-width: 70%;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .message-card.user {
+        background: var(--primary-gradient);
+        color: white;
+      }
+
+      .message-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin: 0 10px;
+      }
+
+      .analysis-panel {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 2% 0;
+      }
+
+      .upload-area {
+        border: 2px dashed #dee2e6;
+        border-radius: 15px;
+        padding: 40px;
+        text-align: center;
+        margin: 20px;
+        transition: all 0.3s ease;
+      }
+
+      .upload-area:hover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+      }
+
+      .upload-btn {
+        background: var(--success-gradient);
+        border: none;
+        border-radius: 50px;
+        padding: 15px 40px;
+        font-weight: 600;
+        color: white;
+        box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+      }
+
+      .status-indicator {
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-weight: 600;
+        text-align: center;
+        margin: 10px;
+      }
+
+      .status-success {
+        background: rgba(79, 172, 254, 0.1);
+        color: #4facfe;
+        border: 1px solid rgba(79, 172, 254, 0.3);
+      }
+
+      .status-error {
+        background: rgba(245, 87, 108, 0.1);
+        color: #f5576c;
+        border: 1px solid rgba(245, 87, 108, 0.3);
+      }
+
+      .status-info {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 1px solid rgba(102, 126, 234, 0.3);
+      }
+
+      #summaryModal {
+        z-index: 99999 !important;
+      }
+
+      #summaryModal .modal-dialog {
+        z-index: 99999 !important;
+      }
+
+      .chat-loader {
+        width: 40px;
+        height: 40px;
+      }
+
+      .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+      }
+
+      .accordion-item {
+        border: none;
+        margin-bottom: 15px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        animation: slideInUp 0.5s ease-out;
+      }
+
+      .accordion-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
         }
-        
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .step-completed {
+        animation: pulse 0.6s ease-in-out;
+      }
+
+      .step-in-progress {
+        animation: pulse 1.5s infinite;
+      }
+
+      .accordion-button {
+        background: #f8f9fa;
+        border: none;
+        border-radius: 0;
+        font-weight: 600;
+        padding: 10px;
+      }
+
+      .accordion-button:not(.collapsed) {
+        background: var(--primary-gradient);
+        color: white;
+      }
+      .accordion-button:not(.collapsed) i {
+        color: white !important;
+      }
+
+      .accordion-body {
+        padding: 20px 25px;
+        background: #f8f9fa;
+        border-radius: 0 0 15px 15px;
+      }
+
+      .accordion-button {
+        transition: all 0.3s ease;
+      }
+
+      .accordion-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .accordion-collapse {
+        transition: all 0.4s ease;
+      }
+
+      .accordion-collapse.show {
+        animation: slideDown 0.5s ease-out;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .processing-step {
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+        }
+      }
+
+      .step-completed {
+        animation: completedPulse 0.6s ease-out;
+      }
+
+      @keyframes completedPulse {
+        0% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4);
+        }
+        50% {
+          transform: scale(1.02);
+          box-shadow: 0 0 0 8px rgba(40, 167, 69, 0.2);
+        }
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+        }
+      }
+
+      .step-failed {
+        animation: failedShake 0.6s ease-out;
+      }
+
+      @keyframes failedShake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+
+      .control-buttons {
+        margin-top: 15px;
+      }
+
+      .control-buttons .btn {
+        transition: all 0.3s ease;
+      }
+
+      .control-buttons .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .video-controls {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .controls {
+        margin-top: 20px;
+      }
+
+      .controls .btn {
+        margin: 5px;
+      }
+
+      .accordion-button:focus {
+        box-shadow: none;
+      }
+
+      .result-block {
+        border-radius: 15px;
+        border: none;
+      }
+
+      .alert-success {
+        background: rgba(79, 172, 254, 0.1);
+        border: 1px solid rgba(79, 172, 254, 0.3);
+        color: #4facfe;
+      }
+
+      .alert-info {
+        background: rgba(102, 126, 234, 0.1);
+        border: 1px solid rgba(102, 126, 234, 0.3);
+        color: #667eea;
+      }
+
+      .policy-download-box {
+        border-radius: 15px;
+        border: 1px solid rgba(79, 172, 254, 0.3);
+      }
+
+      /* Enhanced Summary Report Styling */
+      .summary-report {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 0.8s ease-in-out;
+      }
+
+      .summary-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        text-align: center;
+      }
+
+      .summary-section {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid var(--brand-primary);
+      }
+
+      .summary-section h5 {
+        color: var(--brand-primary);
+        font-weight: 600;
+        margin-bottom: 15px;
+      }
+
+      .summary-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+      }
+
+      .metric-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border-top: 4px solid var(--brand-primary);
+      }
+
+      .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--brand-primary);
+        margin-bottom: 5px;
+      }
+
+      .metric-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .status-completed {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+      }
+
+      .status-pending {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+      }
+
+      .status-failed {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+      }
+
+      .progress-ring {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 15px;
+      }
+
+      .progress-ring circle {
+        fill: transparent;
+        stroke: var(--brand-primary);
+        stroke-width: 4;
+        stroke-linecap: round;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+      }
+
+      .progress-text {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--brand-primary);
+      }
+
+      @media (max-width: 768px) {
         .main-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+          padding: 10px;
         }
-        
+
         .chat-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 25px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-            max-width: 1200px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            border-radius: 10px;
+          border-radius: 15px;
         }
-        
-        .chat-header {
-            background: #1284d9;
-            color: white;
-            padding: 25px;
-            text-align: center;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
-        }
-        
+
         .chat-header h1 {
-            font-weight: 700;
-            margin: 0;
-            font-size: 2.5rem;
+          font-size: 1.5rem;
         }
-        
-        .chat-header p {
-            margin: 10px 0 0 0;
-            opacity: 0.9;
-            font-size: 1.1rem;
-        }
-        
-        .video-section {
-            padding: 30px;
-            text-align: center;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        }
-        
-        .agent-video {
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            max-width: 100%;
-            height: auto;
-        }
-        
-        .controls {
-            margin-top: 25px;
-            flex-wrap: nowrap !important;
-        }
-        
-        .btn-modern {
-            background: var(--primary-gradient);
-            border: none;
-    border-radius: 23px;
-    padding: 3px 25px;
-            font-weight: 600;
-            color: white;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 98, 230, 0.3);
-            margin: 5px;
-        }
-        
-        .btn-modern:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 98, 230, 0.4);
-            color: white;
-        }
-        
-        .btn-modern:disabled {
-            opacity: 0.6;
-            transform: none;
-            box-shadow: 0 4px 15px rgba(0, 98, 230, 0.2);
-        }
-        
-        .mic-button {
-            background: var(--secondary-gradient);
-            border-radius: 23%;
-            width: 60px;
-            height: 60px;
-            font-size: 1.5rem;
-            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
-        }
-        
-        .mic-button.recording {
-            background: var(--success-gradient);
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        
-        .chat-box {
-            background: white;
-            border-radius: 20px;
-            margin: 2% 0;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        .chat-head {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .chat-logo {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin-right: 15px;
-        }
-        
-        .chat-title {
-            font-weight: 600;
-            margin: 0;
-        }
-        
-        .chat-list {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 20px;
-            max-height: calc(100vh - 200px);
-        }
-        
-        .chat-list ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .chat-message {
-            margin-bottom: 20px;
-            display: flex;
-            align-items: flex-start;
-        }
-        
-        .chat-message.user {
-            justify-content: flex-end;
-        }
-        
+
         .message-card {
-            background: #f8f9fa;
-            border-radius: 20px;
-            padding: 15px 20px;
-            max-width: 70%;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+          max-width: 90%;
         }
-        
-        .message-card.user {
-            background: var(--primary-gradient);
-            color: white;
-        }
-        
-        .message-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin: 0 10px;
-        }
-        
+
         .analysis-panel {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            padding: 2% 0;
+          margin: 10px;
+          border-radius: 15px;
         }
-        
+
         .upload-area {
-            border: 2px dashed #dee2e6;
-            border-radius: 15px;
-            padding: 40px;
-            text-align: center;
-            margin: 20px;
-            transition: all 0.3s ease;
+          padding: 20px;
+          margin: 10px;
         }
-        
-        .upload-area:hover {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.05);
-        }
-        
-        .upload-btn {
-            background: var(--success-gradient);
-            border: none;
-            border-radius: 50px;
-            padding: 15px 40px;
-            font-weight: 600;
-            color: white;
-            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .upload-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
-        }
-        
-        .status-indicator {
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-weight: 600;
-            text-align: center;
-            margin: 10px;
-        }
-        
-        .status-success {
-            background: rgba(79, 172, 254, 0.1);
-            color: #4facfe;
-            border: 1px solid rgba(79, 172, 254, 0.3);
-        }
-        
-        .status-error {
-            background: rgba(245, 87, 108, 0.1);
-            color: #f5576c;
-            border: 1px solid rgba(245, 87, 108, 0.3);
-        }
-        
-        .status-info {
-            background: rgba(102, 126, 234, 0.1);
-            color: #667eea;
-            border: 1px solid rgba(102, 126, 234, 0.3);
-        } 
-        
-        #summaryModal {
-            z-index: 99999 !important;
-        }
-        
-        #summaryModal .modal-dialog {
-            z-index: 99999 !important;
-        }
-        
-        .chat-loader {
-            width: 40px;
-            height: 40px;
-        }
-        
-        .spinner-border-sm {
-            width: 1rem;
-            height: 1rem;
-        }
-        
-        .accordion-item {
-            border: none;
-            margin-bottom: 15px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            animation: slideInUp 0.5s ease-out;
-        }
-        
-        .accordion-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-        
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .step-completed {
-            animation: pulse 0.6s ease-in-out;
-        }
-        
-        .step-in-progress {
-            animation: pulse 1.5s infinite;
-        }
-        
-        .accordion-button {
-            background: #f8f9fa;
-            border: none;
-            border-radius: 0;
-            font-weight: 600;
-            padding: 10px;
-        }
-        
-        .accordion-button:not(.collapsed) {
-            background: var(--primary-gradient);
-            color: white;
-        }
-        .accordion-button:not(.collapsed) i{
-            color: white !important;
-        }
-        
-        .accordion-body {
-            padding: 20px 25px;
-            background: #f8f9fa;
-            border-radius: 0 0 15px 15px;
-        }
-        
-        .accordion-button {
-            transition: all 0.3s ease;
-        }
-        
-        .accordion-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .accordion-collapse {
-            transition: all 0.4s ease;
-        }
-        
-        .accordion-collapse.show {
-            animation: slideDown 0.5s ease-out;
-        }
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .processing-step {
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
-            }
-        }
-        
-        .step-completed {
-            animation: completedPulse 0.6s ease-out;
-        }
-        
-        @keyframes completedPulse {
-            0% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4);
-            }
-            50% {
-                transform: scale(1.02);
-                box-shadow: 0 0 0 8px rgba(40, 167, 69, 0.2);
-            }
-            100% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
-            }
-        }
-        
-        .step-failed {
-            animation: failedShake 0.6s ease-out;
-        }
-        
-        @keyframes failedShake {
-            0%, 100% {
-                transform: translateX(0);
-            }
-            25% {
-                transform: translateX(-5px);
-            }
-            75% {
-                transform: translateX(5px);
-            }
-        }
-        
-        .control-buttons {
-            margin-top: 15px;
-        }
-        
-        .control-buttons .btn {
-            transition: all 0.3s ease;
-        }
-        
-        .control-buttons .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        
-        .video-controls {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        .controls {
-            margin-top: 20px;
-        }
-        
-        .controls .btn {
-            margin: 5px;
-        }
-        
-        .accordion-button:focus {
-            box-shadow: none;
-        }
-        
-        .result-block {
-            border-radius: 15px;
-            border: none;
-        }
-        
-        .alert-success {
-            background: rgba(79, 172, 254, 0.1);
-            border: 1px solid rgba(79, 172, 254, 0.3);
-            color: #4facfe;
-        }
-        
-        .alert-info {
-            background: rgba(102, 126, 234, 0.1);
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            color: #667eea;
-        }
-        
-        .policy-download-box {
-            border-radius: 15px;
-            border: 1px solid rgba(79, 172, 254, 0.3);
-        }
-        
-        /* Enhanced Summary Report Styling */
-        .summary-report {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 0.8s ease-in-out;
-        }
-        
-        .summary-header {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-        
-        .summary-section {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            border-left: 4px solid var(--brand-primary);
-        }
-        
-        .summary-section h5 {
-            color: var(--brand-primary);
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-        
-        .summary-metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-        
-        .metric-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            border-top: 4px solid var(--brand-primary);
-        }
-        
-        .metric-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--brand-primary);
-            margin-bottom: 5px;
-        }
-        
-        .metric-label {
-            color: #6c757d;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 25px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .status-completed {
-            background: rgba(40, 167, 69, 0.1);
-            color: #28a745;
-            border: 1px solid rgba(40, 167, 69, 0.3);
-        }
-        
-        .status-pending {
-            background: rgba(255, 193, 7, 0.1);
-            color: #ffc107;
-            border: 1px solid rgba(255, 193, 7, 0.3);
-        }
-        
-        .status-failed {
-            background: rgba(220, 53, 69, 0.1);
-            color: #dc3545;
-            border: 1px solid rgba(220, 53, 69, 0.3);
-        }
-        
-        .progress-ring {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 15px;
-        }
-        
-        .progress-ring circle {
-            fill: transparent;
-            stroke: var(--brand-primary);
-            stroke-width: 4;
-            stroke-linecap: round;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-        }
-        
-        .progress-text {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--brand-primary);
-        }
-        
-        @media (max-width: 768px) {
-            .main-container {
-                padding: 10px;
-            }
-            
-            .chat-container {
-                border-radius: 15px;
-            }
-            
-            .chat-header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .message-card {
-                max-width: 90%;
-            }
-            
-            .analysis-panel {
-                margin: 10px;
-                border-radius: 15px;
-            }
-            
-            .upload-area {
-                padding: 20px;
-                margin: 10px;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="main-container">
-        <div class="chat-container">
-            <div class="chat-header">
-                <h1>Health Insurance Agent</h1>
-                <p>Your Assurance for a Healthy Life</p>
-            </div>
-            
-            <div class="row row-cols-1 row-cols-md-3 g-4">
-                <!-- Video Section -->
-                <div class="col">
-                    <div class="video-section">
-                        <video
-                            src="/static/images/agentloop.mp4"
-                            class="agent-video"
-                            autoplay
-                            muted
-                            loop
-                            playsinline
-                            disablePictureInPicture
-                            controlsList="nodownload nofullscreen noremoteplayback"
-                        ></video>
-                        
-                        <div class="controls d-flex flex-wrap justify-content-center gap-2">
-                            <button class="btn btn-modern" id="startSessionBtn">
-                                <i class="bi bi-play-circle me-2"></i>Start Conversation
-                            </button>
-                            <button class="btn mic-button" id="micBtn" disabled>
-                                <i class="bi bi-mic"></i>
-                            </button>
-                            <button class="btn btn-modern" id="endSessionBtn" disabled>
-                                <i class="bi bi-stop-circle me-2"></i>End Conversation
-                            </button>
-                        </div>
-                        
-                        <audio id="audioPlayer" class="audio-player" autoplay></audio>
-                    </div>
-                </div>
-                
-                <!-- Chat Section -->
-                <div class="col">
-                    <div class="chat-box h-100">
-                        <div class="chat-head">
-                            <img
-                                src="{{ url_for('static', filename='images/chatbotava.png') }}"
-                                class="chat-logo"
-                                alt="Chat Head"
-                            />
-                            <div>
-                                <h5 class="chat-title">Health Insurance Assistant</h5>
-                                <small>Powered by Nova Sonic AI</small>
-                            </div>
-                        </div>
-                        <div class="chat-list">
-                            <ul id="chatMessages">
-                                <!-- Messages will be added here -->
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Analysis Panel -->
-                <div class="col">
-                    <div class="analysis-panel h-100">
-                        <!-- Upload Section -->
-                        <div class="upload-div mb-3"></div>
-                        
-                        <!-- Process Section -->
-                        <div class="process-div mb-3"></div>
-                        
-                    </div>
-                </div>
-            </div>
+      <div class="chat-container">
+        <div class="chat-header">
+            <div class="row">
+           <div class="col-3">
+          <img
+            src="{{ url_for('static', filename='images/d-ai-logo-inverse.svg') }}"
+            class="img-fluid"
+            alt="Chat Head"
+          />
+          </div>
+          <div class="col">
+          <h1>Health Insurance Agent</h1>
+          <p>Your Assurance for a Healthy Life</p>
+          </div>
+          </div>
         </div>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+          <!-- Video Section -->
+          <div class="col">
+            <div class="video-section">
+              <video
+                src="{{ url_for('static', filename='images/agentloop.mp4') }}"
+                class="agent-video"
+                autoplay
+                muted
+                loop
+                playsinline
+                disablePictureInPicture
+                controlsList="nodownload nofullscreen noremoteplayback"
+              ></video>
+
+              <div
+                class="controls d-flex flex-wrap justify-content-center gap-2"
+              >
+                <button class="btn btn-modern" id="startSessionBtn">
+                  <i class="bi bi-play-circle me-2"></i>Start Conversation
+                </button>
+                <button class="btn mic-button" id="micBtn" disabled>
+                  <i class="bi bi-mic"></i>
+                </button>
+                <button class="btn btn-modern" id="endSessionBtn" disabled>
+                  <i class="bi bi-stop-circle me-2"></i>End Conversation
+                </button>
+              </div>
+
+              <audio id="audioPlayer" class="audio-player" autoplay></audio>
+            </div>
+          </div>
+
+          <!-- Chat Section -->
+          <div class="col">
+            <div class="chat-box h-100">
+              <div class="chat-head">
+                <img
+                  src="{{ url_for('static', filename='images/chatbotava.png') }}"
+                  class="chat-logo"
+                  alt="Chat Head"
+                />
+                <div>
+                  <h5 class="chat-title">Health Insurance Assistant</h5>
+                  <small>Powered by Nova Sonic AI</small>
+                </div>
+              </div>
+              <div class="chat-list">
+                <ul id="chatMessages">
+                  <!-- Messages will be added here -->
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analysis Panel -->
+          <div class="col">
+            <div class="analysis-panel h-100">
+              <!-- Upload Section -->
+              <div class="upload-div mb-3"></div>
+
+              <!-- Process Section -->
+              <div class="process-div mb-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Processing Steps Modal -->
-    <div class="modal fade" id="processingModal" tabindex="-1" aria-labelledby="processingModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header" style="background: var(--primary-gradient); color: white;">
-                    <h5 class="modal-title" id="processingModalLabel">
-                        <i class="bi bi-gear-fill me-2"></i>Document Processing Status
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="steps-div" id="stepsDiv"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="viewSummaryBtn" style="display: none;">
-                        <i class="bi bi-eye me-1"></i> View Summary
-                    </button>
-                    <button type="button" class="btn btn-success" id="getPolicyBtn" style="display: none;">
-                        <i class="bi bi-file-earmark-text me-1"></i> Get Policy
-                    </button>
-                </div>
-            </div>
+    <div
+      class="modal fade"
+      id="processingModal"
+      tabindex="-1"
+      aria-labelledby="processingModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+          <div
+            class="modal-header"
+            style="background: var(--primary-gradient); color: white"
+          >
+            <h5 class="modal-title" id="processingModalLabel">
+              <i class="bi bi-gear-fill me-2"></i>Document Processing Status
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="steps-div" id="stepsDiv"></div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="viewSummaryBtn"
+              style="display: none"
+            >
+              <i class="bi bi-eye me-1"></i> View Summary
+            </button>
+            <button
+              type="button"
+              class="btn btn-success"
+              id="getPolicyBtn"
+              style="display: none"
+            >
+              <i class="bi bi-file-earmark-text me-1"></i> Get Policy
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Summary Modal -->
-    <div class="modal fade" id="summaryModal" tabindex="-1" aria-labelledby="summaryModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header" style="background: var(--primary-gradient); color: white;">
-                    <h5 class="modal-title" id="summaryModalLabel">
-                        <i class="bi bi-file-text me-2"></i>Underwriting Summary Report
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="summaryModalBody">
-                    <div class="text-center text-muted">
-                        <div class="spinner-border text-primary mb-3" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p>Loading summary report...</p>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="printSummaryBtn">
-                        <i class="bi bi-printer me-1"></i>Print Summary
-                    </button>
-                    <button type="button" class="btn btn-success" id="downloadSummaryBtn">
-                        <i class="bi bi-download me-1"></i>Download PDF
-                    </button>
-                </div>
+    <div
+      class="modal fade"
+      id="summaryModal"
+      tabindex="-1"
+      aria-labelledby="summaryModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+          <div
+            class="modal-header"
+            style="background: var(--primary-gradient); color: white"
+          >
+            <h5 class="modal-title" id="summaryModalLabel">
+              <i class="bi bi-file-text me-2"></i>Underwriting Summary Report
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body" id="summaryModalBody">
+            <div class="text-center text-muted">
+              <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p>Loading summary report...</p>
             </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="button" class="btn btn-primary" id="printSummaryBtn">
+              <i class="bi bi-printer me-1"></i>Print Summary
+            </button>
+            <button
+              type="button"
+              class="btn btn-success"
+              id="downloadSummaryBtn"
+            >
+              <i class="bi bi-download me-1"></i>Download PDF
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Scripts -->
@@ -785,82 +881,89 @@
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 
     <script>
-        const socket = io();
-        const chatContainer = document.getElementById("chatMessages");
-        const micBtn = document.getElementById("micBtn");
-        const startSessionBtn = document.getElementById("startSessionBtn");
-        const endSessionBtn = document.getElementById("endSessionBtn");
-        const audioPlayer = document.getElementById("audioPlayer");
+      const socket = io();
+      const chatContainer = document.getElementById("chatMessages");
+      const micBtn = document.getElementById("micBtn");
+      const startSessionBtn = document.getElementById("startSessionBtn");
+      const endSessionBtn = document.getElementById("endSessionBtn");
+      const audioPlayer = document.getElementById("audioPlayer");
 
-        let isRecording = false;
-        let isSessionActive = false;
-        let currentSessionId = null;
-        let final_summary = null;
+      let isRecording = false;
+      let isSessionActive = false;
+      let currentSessionId = null;
+      let final_summary = null;
 
-        socket.on("connect", () => {
-            console.log("[SOCKET] Connected to server");
-            startSessionBtn.disabled = false;
-        });
+      socket.on("connect", () => {
+        console.log("[SOCKET] Connected to server");
+        startSessionBtn.disabled = false;
+      });
 
-        socket.on("disconnect", () => {
-            console.log("[SOCKET] Disconnected from server");
-            resetUI();
-        });
+      socket.on("disconnect", () => {
+        console.log("[SOCKET] Disconnected from server");
+        resetUI();
+      });
 
-        socket.on("nova_session_started", (data) => {
-            isSessionActive = true;
-            currentSessionId = data.session_id;
-            console.log("[INFO] Nova session started:", currentSessionId);
+      socket.on("nova_session_started", (data) => {
+        isSessionActive = true;
+        currentSessionId = data.session_id;
+        console.log("[INFO] Nova session started:", currentSessionId);
 
-            micBtn.disabled = false;
-            startSessionBtn.disabled = true;
-            endSessionBtn.disabled = false;
+        micBtn.disabled = false;
+        startSessionBtn.disabled = true;
+        endSessionBtn.disabled = false;
 
-            if (!isRecording) {
-                setTimeout(() => {
-                    micBtn.click();
-                }, 500);
-            }
-        });
+        if (!isRecording) {
+          setTimeout(() => {
+            micBtn.click();
+          }, 500);
+        }
+      });
 
-        socket.on("assistant_message", function (data) {
-            console.log("Assistant message received:", data.text);
-            appendReplyMessage(data.text);
-        });
+      socket.on("assistant_message", function (data) {
+        console.log("Assistant message received:", data.text);
+        appendReplyMessage(data.text);
+      });
 
-        socket.on("user_message", (data) => {
-            appendUserMessage(data.text);
-        });
+      socket.on("user_message", (data) => {
+        appendUserMessage(data.text);
+      });
 
-        socket.on("audio_output", (data) => {
-            playAudio(data.audio);
-        });
+      socket.on("audio_output", (data) => {
+        playAudio(data.audio);
+      });
 
-        socket.on("error", (data) => {
-            appendReplyMessage(`Error: ${data.message}`);
-        });
+      socket.on("error", (data) => {
+        appendReplyMessage(`Error: ${data.message}`);
+      });
 
-        socket.on("nova_session_stopped", () => {
-            resetUI();
-        });
+      socket.on("nova_session_stopped", () => {
+        resetUI();
+      });
 
-        socket.on("upload_link", function (data) {
-            currentSessionId = data.session_id;
-            console.log("[INFO] Upload link received for session:", currentSessionId);
+      socket.on("upload_link", function (data) {
+        currentSessionId = data.session_id;
+        console.log(
+          "[INFO] Upload link received for session:",
+          currentSessionId
+        );
 
-            console.log("[INFO] Ending Nova Sonic session as upload panel is opening");
-            if (isSessionActive) {
-                socket.emit("end_nova_session");
-                resetUI();
-                appendReplyMessage("✅ Voice conversation ended. Please upload your documents to continue.");
-            }
+        console.log(
+          "[INFO] Ending Nova Sonic session as upload panel is opening"
+        );
+        if (isSessionActive) {
+          socket.emit("end_nova_session");
+          resetUI();
+          appendReplyMessage(
+            "✅ Voice conversation ended. Please upload your documents to continue."
+          );
+        }
 
-            const canvasBody = document.querySelector(".upload-div");
-            canvasBody.innerHTML = "";
+        const canvasBody = document.querySelector(".upload-div");
+        canvasBody.innerHTML = "";
 
-            const uploadArea = document.createElement("div");
-            uploadArea.className = "upload-area";
-            uploadArea.innerHTML = `
+        const uploadArea = document.createElement("div");
+        uploadArea.className = "upload-area";
+        uploadArea.innerHTML = `
                 <i class="bi bi-cloud-upload fs-1 text-primary mb-3"></i>
                 <h5>Upload Your Documents</h5>
                 <p class="text-muted">Please upload your documents as a ZIP file</p>
@@ -870,255 +973,274 @@
                 </button>
             `;
 
-            canvasBody.appendChild(uploadArea);
+        canvasBody.appendChild(uploadArea);
 
-            // Control buttons will be added later when modals are invoked
+        // Control buttons will be added later when modals are invoked
 
-            // Control buttons will be added when modals are invoked
+        // Control buttons will be added when modals are invoked
 
-            const fileInput = document.getElementById('fileUploadInput');
-            fileInput.onchange = async () => {
-                if (fileInput.files.length === 0) return;
+        const fileInput = document.getElementById("fileUploadInput");
+        fileInput.onchange = async () => {
+          if (fileInput.files.length === 0) return;
 
-                const statusDiv = document.createElement("div");
-                statusDiv.textContent = "Uploading ZIP file...";
-                statusDiv.className = "status-indicator status-info";
-                canvasBody.appendChild(statusDiv);
+          const statusDiv = document.createElement("div");
+          statusDiv.textContent = "Uploading ZIP file...";
+          statusDiv.className = "status-indicator status-info";
+          canvasBody.appendChild(statusDiv);
 
-                const formData = new FormData();
-                formData.append("zipFileInput", fileInput.files[0]);
+          const formData = new FormData();
+          formData.append("zipFileInput", fileInput.files[0]);
 
-                try {
-                    const response = await fetch(`/upload/${currentSessionId}`, {
-                        method: "POST",
-                        body: formData,
-                    });
+          try {
+            const response = await fetch(`/upload/${currentSessionId}`, {
+              method: "POST",
+              body: formData,
+            });
 
-                    if (response.ok) {
-                        statusDiv.textContent = "ZIP file uploaded successfully. Starting 8-agent processing...";
-                        statusDiv.className = "status-indicator status-success";
+            if (response.ok) {
+              statusDiv.textContent =
+                "ZIP file uploaded successfully. Starting 8-agent processing...";
+              statusDiv.className = "status-indicator status-success";
 
-                        socket.emit("files_uploaded", { session_id: currentSessionId });
-                        waitForAgentStatus(currentSessionId);
-                    } else {
-                        statusDiv.textContent = "Upload failed. Please try again.";
-                        statusDiv.className = "status-indicator status-error";
-                    }
-                } catch (err) {
-                    statusDiv.textContent = "Upload error. Please check your connection.";
-                    statusDiv.className = "status-indicator status-error";
-                }
+              socket.emit("files_uploaded", { session_id: currentSessionId });
+              waitForAgentStatus(currentSessionId);
+            } else {
+              statusDiv.textContent = "Upload failed. Please try again.";
+              statusDiv.className = "status-indicator status-error";
+            }
+          } catch (err) {
+            statusDiv.textContent =
+              "Upload error. Please check your connection.";
+            statusDiv.className = "status-indicator status-error";
+          }
 
-                fileInput.value = "";
-            };
+          fileInput.value = "";
+        };
 
-            // Modal will be shown when steps are actually processed
-        });
+        // Modal will be shown when steps are actually processed
+      });
 
-        socket.on("policy_generated", function (data) {
-            console.log("[POLICY] Policy generated:", data);
+      socket.on("policy_generated", function (data) {
+        console.log("[POLICY] Policy generated:", data);
 
-            const policyDiv = document.createElement("div");
-            policyDiv.className = "alert alert-success mt-3 text-center";
-            policyDiv.innerHTML = `
+        const policyDiv = document.createElement("div");
+        policyDiv.className = "alert alert-success mt-3 text-center";
+        policyDiv.innerHTML = `
                 <i class="bi bi-file-earmark-word-fill text-success me-2 fs-4"></i>
                 <strong>Health Insurance Policy Generated</strong><br>
                 <small>Policy Number: ${data.policy_number}</small><br>
                 <small class="text-muted">Click "Get Policy" button to download and view</small>
             `;
 
-            document
-                .querySelector("#processingModal .modal-body")
-                .appendChild(policyDiv);
+        document
+          .querySelector("#processingModal .modal-body")
+          .appendChild(policyDiv);
 
-            appendReplyMessage(`
+        appendReplyMessage(`
                 <div class="policy-download-box p-3 border rounded mt-2" style="background-color: #f0f8ff;">
                     <h6 class="text-success"><i class="bi bi-check-circle-fill"></i> Policy Generated Successfully!</h6>
                     <p class="mb-2"><strong>Policy Number:</strong> ${data.policy_number}</p>
                     <p class="mb-0"><small class="text-muted">Click the "Get Policy" button in the side panel to download and view your policy.</small></p>
                 </div>
             `);
-        });
+      });
 
-        function waitForAgentStatus(sessionId, maxAttempts = 60, delay = 3000) {
-            let attempts = 0;
-            let lastProcessedSteps = new Set();
-            let isProcessingComplete = false;
+      function waitForAgentStatus(sessionId, maxAttempts = 60, delay = 3000) {
+        let attempts = 0;
+        let lastProcessedSteps = new Set();
+        let isProcessingComplete = false;
 
-            const $canvasBody = $(".process-div");
-            $canvasBody.html(`
-<div id="loadingVideoWrapper" class="text-center">
-        <p class="text-center">Processing your documents...</p>
-    </div>
+        const $canvasBody = $(".process-div");
+        $canvasBody.html(`
+                <div id="loadingVideoWrapper" class="text-center">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-center">Processing your documents...</p>
+                </div>
             `);
-            
-            // Add control buttons when process-div is shown
-            addControlButtons();
 
-            // Modal will be shown when steps are actually processed
-            function checkStatusFile() {
-                const url = `/status/${sessionId}`;
-                console.log(`[INFO] Checking agent status (attempt ${attempts + 1})`);
+        // Add control buttons when process-div is shown
+        addControlButtons();
 
-                fetch(url)
-                    .then((res) => {
-                        if (!res.ok) throw new Error("Status file not ready");
-                        return res.json();
-                    })
-                    .then((json) => {
-                        const agentData = json.agents || {};
+        // Modal will be shown when steps are actually processed
+        function checkStatusFile() {
+          const url = `/status/${sessionId}`;
+          console.log(`[INFO] Checking agent status (attempt ${attempts + 1})`);
 
-                        const agentNames = [
-                            "data_intake",
-                            "document_verification",
-                            "medical_risk_assessment",
-                            "financial",
-                            "driving",
-                            "compliance",
-                            "lifestyle_behavioral",
-                            "summary_generation",
-                        ];
+          fetch(url)
+            .then((res) => {
+              if (!res.ok) throw new Error("Status file not ready");
+              return res.json();
+            })
+            .then((json) => {
+              const agentData = json.agents || {};
 
-                        const stepData = agentNames.map((agentName, index) => {
-                            const agent = agentData[agentName] || {};
-                            return {
-                                step: formatAgentName(agentName),
-                                status: agent.status || "pending",
-                                description: getAgentDescription(agentName),
-                                result_summary: agent.analysis
-                                    ? agent.analysis.substring(0, 100) + "..."
-                                    : "",
-                                timestamp: agent.timestamp || "",
-                            };
-                        });
+              const agentNames = [
+                "data_intake",
+                "document_verification",
+                "medical_risk_assessment",
+                "financial",
+                "driving",
+                "compliance",
+                "lifestyle_behavioral",
+                "summary_generation",
+              ];
 
-                        if (stepData.length > 0) {
-                            if ($("#loadingVideoWrapper").length > 0) {
-                                $("#loadingVideoWrapper").remove();
-                                initializeStepsAccordion(stepData);
-                            }
+              const stepData = agentNames.map((agentName, index) => {
+                const agent = agentData[agentName] || {};
+                return {
+                  step: formatAgentName(agentName),
+                  status: agent.status || "pending",
+                  description: getAgentDescription(agentName),
+                  result_summary: agent.analysis
+                    ? agent.analysis.substring(0, 100) + "..."
+                    : "",
+                  timestamp: agent.timestamp || "",
+                };
+              });
 
-                            stepData.forEach((step, index) => {
-                                const stepKey = `${step.step}_${index}`;
-                                if (
-                                    !lastProcessedSteps.has(stepKey) ||
-                                    hasStepStatusChanged(step, index)
-                                ) {
-                                    updateStepUI(step, index);
-                                    lastProcessedSteps.add(stepKey);
-                                }
-                            });
+              if (stepData.length > 0) {
+                if ($("#loadingVideoWrapper").length > 0) {
+                  $("#loadingVideoWrapper").remove();
+                  initializeStepsAccordion(stepData);
+                }
 
-                            const allCompleted = stepData.every(
-                                (step) => step.status === "completed"
-                            );
+                stepData.forEach((step, index) => {
+                  const stepKey = `${step.step}_${index}`;
+                  if (
+                    !lastProcessedSteps.has(stepKey) ||
+                    hasStepStatusChanged(step, index)
+                  ) {
+                    updateStepUI(step, index);
+                    lastProcessedSteps.add(stepKey);
+                  }
+                });
 
-                            if (allCompleted && !isProcessingComplete) {
-                                isProcessingComplete = true;
-                                const summaryAgent = agentData["summary_generation"] || {};
-                                final_summary = summaryAgent.analysis || "";
+                const allCompleted = stepData.every(
+                  (step) => step.status === "completed"
+                );
 
-                                setTimeout(() => {
-                                    addFinalResultToUI({
-                                        status: "COMPLETED",
-                                        message: "analysis completed successfully",
-                                    });
+                if (allCompleted && !isProcessingComplete) {
+                  isProcessingComplete = true;
+                  const summaryAgent = agentData["summary_generation"] || {};
+                  final_summary = summaryAgent.analysis || "";
 
-                                    // Show action buttons in processing modal
-                                    document.getElementById('viewSummaryBtn').style.display = 'inline-block';
-                                    document.getElementById('getPolicyBtn').style.display = 'inline-block';
-
-                                    if (final_summary) {
-                                        appendReplyMessage("✅ <strong>Underwriting analysis completed!</strong><br><small>Click 'View Summary' button to see the full report.</small>");
-                                        
-                                        const $chatList = $(".chat-list");
-                                        $chatList.animate(
-                                            {
-                                                scrollTop: $chatList.prop("scrollHeight")
-                                            },
-                                            1000
-                                        );
-                                    }
-                                }, 1000);
-
-                                return;
-                            }
-                        }
-
-                        if (!isProcessingComplete) {
-                            attempts++;
-                            if (attempts < maxAttempts) {
-                                setTimeout(checkStatusFile, delay);
-                            } else {
-                                console.error("Agent status file not ready after max attempts.");
-                                $canvasBody.html(
-                                    `<div class="text-danger text-center mt-4 fw-bold">Error: Processing took too long or failed.</div>`
-                                );
-                            }
-                        }
-                    })
-                    .catch(() => {
-                        attempts++;
-                        if (attempts < maxAttempts) {
-                            setTimeout(checkStatusFile, delay);
-                        } else {
-                            console.error("Agent status file not ready after max attempts.");
-                            if ($("#loadingVideoWrapper").length > 0) {
-                                $canvasBody.html(
-                                    `<div class="text-danger text-center mt-4 fw-bold">Error: Processing took too long or failed.</div>`
-                                );
-                            }
-                        }
+                  setTimeout(() => {
+                    addFinalResultToUI({
+                      status: "COMPLETED",
+                      message: "analysis completed successfully",
                     });
-            }
 
-            checkStatusFile();
+                    // Show action buttons in processing modal
+                    document.getElementById("viewSummaryBtn").style.display =
+                      "inline-block";
+                    document.getElementById("getPolicyBtn").style.display =
+                      "inline-block";
+
+                    if (final_summary) {
+                      appendReplyMessage(
+                        "✅ <strong>Underwriting analysis completed!</strong><br><small>Click 'View Summary' button to see the full report.</small>"
+                      );
+
+                      const $chatList = $(".chat-list");
+                      $chatList.animate(
+                        {
+                          scrollTop: $chatList.prop("scrollHeight"),
+                        },
+                        1000
+                      );
+                    }
+                  }, 1000);
+
+                  return;
+                }
+              }
+
+              if (!isProcessingComplete) {
+                attempts++;
+                if (attempts < maxAttempts) {
+                  setTimeout(checkStatusFile, delay);
+                } else {
+                  console.error(
+                    "Agent status file not ready after max attempts."
+                  );
+                  $canvasBody.html(
+                    `<div class="text-danger text-center mt-4 fw-bold">Error: Processing took too long or failed.</div>`
+                  );
+                }
+              }
+            })
+            .catch(() => {
+              attempts++;
+              if (attempts < maxAttempts) {
+                setTimeout(checkStatusFile, delay);
+              } else {
+                console.error(
+                  "Agent status file not ready after max attempts."
+                );
+                if ($("#loadingVideoWrapper").length > 0) {
+                  $canvasBody.html(
+                    `<div class="text-danger text-center mt-4 fw-bold">Error: Processing took too long or failed.</div>`
+                  );
+                }
+              }
+            });
         }
 
-        function formatAgentName(agentName) {
-            const nameMap = {
-                data_intake: "Data Intake Agent",
-                document_verification: "Document Verification Agent",
-                medical_risk_assessment: "Medical Risk Assessment Agent",
-                financial: "Financial Analysis Agent",
-                driving: "Driving Record Analysis Agent",
-                compliance: "Compliance Verification Agent",
-                lifestyle_behavioral: "Lifestyle & Behavioral Analysis Agent",
-                summary_generation: "Summary Generation Agent",
-            };
-            return (
-                nameMap[agentName] ||
-                agentName.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
-            );
+        checkStatusFile();
+      }
+
+      function formatAgentName(agentName) {
+        const nameMap = {
+          data_intake: "Data Intake Agent",
+          document_verification: "Document Verification Agent",
+          medical_risk_assessment: "Medical Risk Assessment Agent",
+          financial: "Financial Analysis Agent",
+          driving: "Driving Record Analysis Agent",
+          compliance: "Compliance Verification Agent",
+          lifestyle_behavioral: "Lifestyle & Behavioral Analysis Agent",
+          summary_generation: "Summary Generation Agent",
+        };
+        return (
+          nameMap[agentName] ||
+          agentName.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+        );
+      }
+
+      function getAgentDescription(agentName) {
+        const descriptions = {
+          data_intake:
+            "Extract customer information and policy details using Nova Pro.",
+          document_verification:
+            "Validate document completeness and authenticity.",
+          medical_risk_assessment:
+            "Assess medical risks and health conditions.",
+          financial: "Analyze financial capacity and coverage appropriateness.",
+          driving: "Evaluate driving records and motor vehicle history.",
+          compliance:
+            "Verify regulatory compliance and documentation requirements.",
+          lifestyle_behavioral:
+            "Analyze lifestyle and behavioral risk factors.",
+          summary_generation: "Generate comprehensive summary.",
+        };
+        return descriptions[agentName] || "Processing...";
+      }
+
+      function addControlButtons() {
+        // Check if control buttons already exist
+        if (document.querySelector(".control-buttons")) {
+          return;
         }
 
-        function getAgentDescription(agentName) {
-            const descriptions = {
-                data_intake: "Extract customer information and policy details using Nova Pro.",
-                document_verification: "Validate document completeness and authenticity.",
-                medical_risk_assessment: "Assess medical risks and health conditions.",
-                financial: "Analyze financial capacity and coverage appropriateness.",
-                driving: "Evaluate driving records and motor vehicle history.",
-                compliance: "Verify regulatory compliance and documentation requirements.",
-                lifestyle_behavioral: "Analyze lifestyle and behavioral risk factors.",
-                summary_generation: "Generate comprehensive summary.",
-            };
-            return descriptions[agentName] || "Processing...";
-        }
+        const canvasBody = document.querySelector(".upload-div");
+        if (!canvasBody) return;
 
-        function addControlButtons() {
-            // Check if control buttons already exist
-            if (document.querySelector('.control-buttons')) {
-                return;
-            }
-            
-            const canvasBody = document.querySelector(".upload-div");
-            if (!canvasBody) return;
-            
-            // Add control buttons under upload area
-            const controlButtons = document.createElement("div");
-            controlButtons.className = "control-buttons mt-3 d-flex flex-wrap gap-2 justify-content-center";
-            controlButtons.innerHTML = `
+        // Add control buttons under upload area
+        const controlButtons = document.createElement("div");
+        controlButtons.className =
+          "control-buttons mt-3 d-flex flex-wrap gap-2 justify-content-center";
+        controlButtons.innerHTML = `
                 <button class="btn btn-outline-primary btn-sm" id="openProcessingModalBtn">
                     <i class="bi bi-gear-fill me-1"></i>Processing Steps
                 </button>
@@ -1126,46 +1248,56 @@
                     <i class="bi bi-file-text me-1"></i>Summary Report
                 </button>
             `;
-            canvasBody.appendChild(controlButtons);
-            
-            // Add event listeners for the buttons
-            document.getElementById('openProcessingModalBtn').addEventListener('click', function() {
-                const processingModal = new bootstrap.Modal(document.getElementById('processingModal'));
-                processingModal.show();
-            });
+        canvasBody.appendChild(controlButtons);
 
-            document.getElementById('openSummaryModalBtn').addEventListener('click', function() {
-                const summaryModal = new bootstrap.Modal(document.getElementById('summaryModal'));
-                summaryModal.show();
-            });
+        // Add event listeners for the buttons
+        document
+          .getElementById("openProcessingModalBtn")
+          .addEventListener("click", function () {
+            const processingModal = new bootstrap.Modal(
+              document.getElementById("processingModal")
+            );
+            processingModal.show();
+          });
+
+        document
+          .getElementById("openSummaryModalBtn")
+          .addEventListener("click", function () {
+            const summaryModal = new bootstrap.Modal(
+              document.getElementById("summaryModal")
+            );
+            summaryModal.show();
+          });
+      }
+
+      function initializeStepsAccordion(stepData) {
+        // Show processing modal when steps are being processed
+        const processingModal = new bootstrap.Modal(
+          document.getElementById("processingModal")
+        );
+        processingModal.show();
+
+        // Add control buttons after modal is invoked
+        addControlButtons();
+
+        let container = document.getElementById("stepsDiv");
+
+        if (!container) {
+          const accordionDiv = document.createElement("div");
+          accordionDiv.id = "stepsDiv";
+          accordionDiv.className = "accordion";
+          document.querySelector(".steps-div").appendChild(accordionDiv);
+          container = accordionDiv;
         }
 
-        function initializeStepsAccordion(stepData) {
-            // Show processing modal when steps are being processed
-            const processingModal = new bootstrap.Modal(document.getElementById('processingModal'));
-            processingModal.show();
-            
-            // Add control buttons after modal is invoked
-            addControlButtons();
-            
-            let container = document.getElementById("stepsDiv");
+        container.innerHTML = "";
 
-            if (!container) {
-                const accordionDiv = document.createElement("div");
-                accordionDiv.id = "stepsDiv";
-                accordionDiv.className = "accordion";
-                document.querySelector(".steps-div").appendChild(accordionDiv);
-                container = accordionDiv;
-            }
+        stepData.forEach((item, index) => {
+          const stepId = `step${index}`;
+          const collapseId = `collapse${index}`;
+          const isFirst = index === 0;
 
-            container.innerHTML = "";
-
-            stepData.forEach((item, index) => {
-                const stepId = `step${index}`;
-                const collapseId = `collapse${index}`;
-                const isFirst = index === 0;
-
-                container.innerHTML += `
+          container.innerHTML += `
                     <div class="accordion-item processing-step">
                         <h2 class="accordion-header d-flex justify-content-between align-items-center" id="${stepId}">
                             <button class="accordion-button" type="button"
@@ -1194,102 +1326,111 @@
                         </div>
                     </div>
                 `;
+        });
+      }
+
+      function hasStepStatusChanged(step, index) {
+        const currentIcon = document.getElementById(`tick-${index}`);
+        if (!currentIcon) return true;
+
+        const currentStatus = step.status;
+        const hasWarningClass = currentIcon.classList.contains("text-warning");
+        const hasSuccessClass = currentIcon.classList.contains("text-success");
+        const hasDangerClass = currentIcon.classList.contains("text-danger");
+
+        if (currentStatus === "in_progress" && !hasWarningClass) return true;
+        if (currentStatus === "completed" && !hasSuccessClass) return true;
+        if (currentStatus === "failed" && !hasDangerClass) return true;
+
+        return false;
+      }
+
+      function updateStepUI(step, index) {
+        const tick = document.getElementById(`tick-${index}`);
+        const label = document.getElementById(`step-label-${index}`);
+        const desc = document.getElementById(`desc-${index}`);
+        const collapseElement = document.getElementById(`collapse${index}`);
+        const accordionItem = document
+          .querySelector(`#step${index}`)
+          .closest(".accordion-item");
+        const progressBar = document.querySelector(
+          `#collapse${index} .progress-bar`
+        );
+
+        if (!tick || !label || !desc) return;
+
+        // Update progress bar
+        if (progressBar) {
+          if (step.status === "completed") {
+            progressBar.style.width = "100%";
+            progressBar.classList.remove("progress-bar-animated");
+          } else if (
+            step.status === "in_progress" ||
+            step.status === "running"
+          ) {
+            progressBar.style.width = "50%";
+          }
+        }
+
+        if (step.status === "in_progress" || step.status === "running") {
+          tick.className = "bi bi-arrow-repeat text-warning fs-4";
+          label.innerHTML = `${step.step} <span class="spinner-border spinner-border-sm text-warning ms-2" role="status"></span>`;
+
+          // Add animation class
+          if (accordionItem) {
+            accordionItem.classList.add("step-in-progress");
+          }
+
+          if (collapseElement) {
+            const collapse = new bootstrap.Collapse(collapseElement, {
+              show: true,
             });
-        }
+          }
 
-        function hasStepStatusChanged(step, index) {
-            const currentIcon = document.getElementById(`tick-${index}`);
-            if (!currentIcon) return true;
-
-            const currentStatus = step.status;
-            const hasWarningClass = currentIcon.classList.contains("text-warning");
-            const hasSuccessClass = currentIcon.classList.contains("text-success");
-            const hasDangerClass = currentIcon.classList.contains("text-danger");
-
-            if (currentStatus === "in_progress" && !hasWarningClass) return true;
-            if (currentStatus === "completed" && !hasSuccessClass) return true;
-            if (currentStatus === "failed" && !hasDangerClass) return true;
-
-            return false;
-        }
-
-        function updateStepUI(step, index) {
-            const tick = document.getElementById(`tick-${index}`);
-            const label = document.getElementById(`step-label-${index}`);
-            const desc = document.getElementById(`desc-${index}`);
-            const collapseElement = document.getElementById(`collapse${index}`);
-            const accordionItem = document.querySelector(`#step${index}`).closest('.accordion-item');
-            const progressBar = document.querySelector(`#collapse${index} .progress-bar`);
-
-            if (!tick || !label || !desc) return;
-
-            // Update progress bar
-            if (progressBar) {
-                if (step.status === "completed") {
-                    progressBar.style.width = "100%";
-                    progressBar.classList.remove("progress-bar-animated");
-                } else if (step.status === "in_progress" || step.status === "running") {
-                    progressBar.style.width = "50%";
-                }
+          // Close all previous completed steps
+          for (let i = 0; i < index; i++) {
+            const prevCollapse = document.getElementById(`collapse${i}`);
+            if (prevCollapse) {
+              const prevCollapseInstance =
+                bootstrap.Collapse.getInstance(prevCollapse);
+              if (prevCollapseInstance) {
+                prevCollapseInstance.hide();
+              }
             }
+          }
+        } else if (step.status === "completed") {
+          tick.className = "bi bi-check-circle text-success fs-4";
+          label.innerHTML = `${step.step} <span class="badge bg-success ms-2">Completed</span>`;
 
-            if (step.status === "in_progress" || step.status === "running") {
-                tick.className = "bi bi-arrow-repeat text-warning fs-4";
-                label.innerHTML = `${step.step} <span class="spinner-border spinner-border-sm text-warning ms-2" role="status"></span>`;
-                
-                // Add animation class
-                if (accordionItem) {
-                    accordionItem.classList.add('step-in-progress');
-                }
+          // Add completion animation
+          if (accordionItem) {
+            accordionItem.classList.remove("processing-step");
+            accordionItem.classList.add("step-completed");
+          }
 
-                if (collapseElement) {
-                    const collapse = new bootstrap.Collapse(collapseElement, {
-                        show: true,
-                    });
-                }
+          // Collapse completed stages
+          if (collapseElement) {
+            const collapseInstance =
+              bootstrap.Collapse.getInstance(collapseElement);
+            if (collapseInstance) {
+              collapseInstance.hide();
+            } else {
+              // If no instance exists, create one and hide it
+              const collapse = new bootstrap.Collapse(collapseElement, {
+                show: false,
+              });
+            }
+          }
 
-                // Close all previous completed steps
-                for (let i = 0; i < index; i++) {
-                    const prevCollapse = document.getElementById(`collapse${i}`);
-                    if (prevCollapse) {
-                        const prevCollapseInstance = bootstrap.Collapse.getInstance(prevCollapse);
-                        if (prevCollapseInstance) {
-                            prevCollapseInstance.hide();
-                        }
-                    }
-                }
-            } else if (step.status === "completed") {
-                tick.className = "bi bi-check-circle text-success fs-4";
-                label.innerHTML = `${step.step} <span class="badge bg-success ms-2">Completed</span>`;
-                
-                // Add completion animation
-                if (accordionItem) {
-                    accordionItem.classList.remove('processing-step');
-                    accordionItem.classList.add('step-completed');
-                }
-                
-                // Collapse completed stages
-                if (collapseElement) {
-                    const collapseInstance = bootstrap.Collapse.getInstance(collapseElement);
-                    if (collapseInstance) {
-                        collapseInstance.hide();
-                    } else {
-                        // If no instance exists, create one and hide it
-                        const collapse = new bootstrap.Collapse(collapseElement, {
-                            show: false
-                        });
-                    }
-                }
-                
-                // Update progress bar to 100%
-                if (progressBar) {
-                    progressBar.style.width = "100%";
-                    progressBar.classList.remove("progress-bar-animated");
-                    progressBar.classList.add("bg-success");
-                }
+          // Update progress bar to 100%
+          if (progressBar) {
+            progressBar.style.width = "100%";
+            progressBar.classList.remove("progress-bar-animated");
+            progressBar.classList.add("bg-success");
+          }
 
-                if (step.result_summary) {
-                    desc.innerHTML = `
+          if (step.result_summary) {
+            desc.innerHTML = `
                         <div class="d-flex align-items-center mb-3">
                             <div class="spinner-border spinner-border-sm text-success me-2" role="status">
                                 <span class="visually-hidden">Loading...</span>
@@ -1301,8 +1442,8 @@
                         </div>
                         <div class="text-success"><small><strong>Completed:</strong> ${step.result_summary}</small></div>
                     `;
-                } else {
-                    desc.innerHTML = `
+          } else {
+            desc.innerHTML = `
                         <div class="d-flex align-items-center mb-3">
                             <div class="spinner-border spinner-border-sm text-success me-2" role="status">
                                 <span class="visually-hidden">Loading...</span>
@@ -1313,33 +1454,33 @@
                             <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                     `;
-                }
-            } else if (step.status === "failed") {
-                tick.className = "bi bi-x-circle text-danger fs-4";
-                label.innerHTML = `${step.step} <span class="badge bg-danger ms-2">Failed</span>`;
-                
-                // Add error animation
-                if (accordionItem) {
-                    accordionItem.classList.remove('processing-step');
-                    accordionItem.classList.add('step-failed');
-                }
-                
-                // Keep failed stages open to show error details
-                if (collapseElement) {
-                    const collapse = new bootstrap.Collapse(collapseElement, {
-                        show: true,
-                    });
-                }
-                
-                // Update progress bar to show error
-                if (progressBar) {
-                    progressBar.style.width = "100%";
-                    progressBar.classList.remove("progress-bar-animated");
-                    progressBar.classList.add("bg-danger");
-                }
+          }
+        } else if (step.status === "failed") {
+          tick.className = "bi bi-x-circle text-danger fs-4";
+          label.innerHTML = `${step.step} <span class="badge bg-danger ms-2">Failed</span>`;
 
-                if (step.result_summary) {
-                    desc.innerHTML = `
+          // Add error animation
+          if (accordionItem) {
+            accordionItem.classList.remove("processing-step");
+            accordionItem.classList.add("step-failed");
+          }
+
+          // Keep failed stages open to show error details
+          if (collapseElement) {
+            const collapse = new bootstrap.Collapse(collapseElement, {
+              show: true,
+            });
+          }
+
+          // Update progress bar to show error
+          if (progressBar) {
+            progressBar.style.width = "100%";
+            progressBar.classList.remove("progress-bar-animated");
+            progressBar.classList.add("bg-danger");
+          }
+
+          if (step.result_summary) {
+            desc.innerHTML = `
                         <div class="d-flex align-items-center mb-3">
                             <div class="spinner-border spinner-border-sm text-danger me-2" role="status">
                                 <span class="visually-hidden">Loading...</span>
@@ -1351,8 +1492,8 @@
                         </div>
                         <div class="text-danger"><small><strong>Error:</strong> ${step.result_summary}</small></div>
                     `;
-                } else {
-                    desc.innerHTML = `
+          } else {
+            desc.innerHTML = `
                         <div class="d-flex align-items-center mb-3">
                             <div class="spinner-border spinner-border-sm text-danger me-2" role="status">
                                 <span class="visually-hidden">Loading...</span>
@@ -1363,196 +1504,204 @@
                             <div class="progress-bar bg-danger" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                     `;
-                }
-            } else {
-                tick.className = "bi bi-check-circle text-secondary fs-4";
-                label.textContent = step.step;
-                desc.innerHTML = step.description;
-            }
+          }
+        } else {
+          tick.className = "bi bi-check-circle text-secondary fs-4";
+          label.textContent = step.step;
+          desc.innerHTML = step.description;
+        }
+      }
+
+      function addFinalResultToUI(finalResult) {
+        if (document.querySelector(".result-block")) return;
+
+        const summaryDiv = document.createElement("div");
+        summaryDiv.className = "alert mt-4 text-center fw-bold result-block";
+
+        if (finalResult.status === "COMPLETED") {
+          summaryDiv.classList.add("alert-success");
+          summaryDiv.innerHTML =
+            '<i class="bi bi-check-circle-fill text-success me-2 fs-4"></i> ' +
+            "UNDERWRITING ANALYSIS COMPLETED";
+
+          const policyNote = document.createElement("p");
+          policyNote.className = "mt-2 mb-0";
+          policyNote.innerHTML =
+            "<small>Policy document is being generated...</small>";
+          summaryDiv.appendChild(policyNote);
+        } else {
+          summaryDiv.classList.add("alert-info");
+          summaryDiv.innerHTML =
+            '<i class="bi bi-info-circle-fill text-info me-2 fs-4"></i> ' +
+            finalResult.status;
         }
 
-        function addFinalResultToUI(finalResult) {
-            if (document.querySelector(".result-block")) return;
+        document
+          .querySelector("#processingModal .modal-body")
+          .appendChild(summaryDiv);
+      }
 
-            const summaryDiv = document.createElement("div");
-            summaryDiv.className = "alert mt-4 text-center fw-bold result-block";
+      function resetUI() {
+        isRecording = false;
+        isSessionActive = false;
+        micBtn.classList.remove("recording");
+        micBtn.disabled = true;
+        startSessionBtn.disabled = false;
+        endSessionBtn.disabled = true;
+        clearAudioQueue();
+      }
 
-            if (finalResult.status === "COMPLETED") {
-                summaryDiv.classList.add("alert-success");
-                summaryDiv.innerHTML =
-                    '<i class="bi bi-check-circle-fill text-success me-2 fs-4"></i> ' +
-                    "UNDERWRITING ANALYSIS COMPLETED";
+      const audioQueue = [];
+      let isPlaying = false;
 
-                const policyNote = document.createElement("p");
-                policyNote.className = "mt-2 mb-0";
-                policyNote.innerHTML =
-                    "<small>Policy document is being generated...</small>";
-                summaryDiv.appendChild(policyNote);
-            } else {
-                summaryDiv.classList.add("alert-info");
-                summaryDiv.innerHTML =
-                    '<i class="bi bi-info-circle-fill text-info me-2 fs-4"></i> ' +
-                    finalResult.status;
-            }
+      function playAudio(base64Audio) {
+        const audioBlob = base64ToBlob(base64Audio, "audio/wav");
+        audioQueue.push(audioBlob);
 
-            document
-                .querySelector("#processingModal .modal-body")
-                .appendChild(summaryDiv);
+        if (!isPlaying) {
+          playNextAudio();
+        }
+      }
+
+      function playNextAudio() {
+        if (audioQueue.length === 0) {
+          isPlaying = false;
+          return;
         }
 
-        function resetUI() {
-            isRecording = false;
-            isSessionActive = false;
-            micBtn.classList.remove("recording");
-            micBtn.disabled = true;
-            startSessionBtn.disabled = false;
-            endSessionBtn.disabled = true;
-            clearAudioQueue();
-        }
+        isPlaying = true;
+        const nextAudioBlob = audioQueue.shift();
+        const audioUrl = URL.createObjectURL(nextAudioBlob);
 
-        const audioQueue = [];
-        let isPlaying = false;
-
-        function playAudio(base64Audio) {
-            const audioBlob = base64ToBlob(base64Audio, "audio/wav");
-            audioQueue.push(audioBlob);
-
-            if (!isPlaying) {
-                playNextAudio();
-            }
-        }
-
-        function playNextAudio() {
-            if (audioQueue.length === 0) {
-                isPlaying = false;
-                return;
-            }
-
-            isPlaying = true;
-            const nextAudioBlob = audioQueue.shift();
-            const audioUrl = URL.createObjectURL(nextAudioBlob);
-
-            audioPlayer.src = audioUrl;
-            audioPlayer.play().catch((e) => {
-                console.error("Audio play failed:", e);
-                isPlaying = false;
-            });
-
-            audioPlayer.onended = () => {
-                URL.revokeObjectURL(audioUrl);
-                playNextAudio();
-            };
-        }
-
-        function clearAudioQueue() {
-            audioQueue.length = 0;
-            isPlaying = false;
-            audioPlayer.pause();
-            audioPlayer.src = "";
-        }
-
-        function base64ToBlob(base64, mimeType) {
-            const byteCharacters = atob(base64);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            return new Blob([byteArray], { type: mimeType });
-        }
-
-        async function startRecording() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const audioContext = new AudioContext({ sampleRate: 16000 });
-                const source = audioContext.createMediaStreamSource(stream);
-                const processor = audioContext.createScriptProcessor(4096, 1, 1);
-
-                processor.onaudioprocess = function (e) {
-                    if (isRecording) {
-                        const inputData = e.inputBuffer.getChannelData(0);
-                        const int16Data = new Int16Array(inputData.length);
-                        for (let i = 0; i < inputData.length; i++) {
-                            int16Data[i] = Math.max(
-                                -32768,
-                                Math.min(32767, inputData[i] * 32768)
-                            );
-                        }
-                        const arrayBuffer = int16Data.buffer;
-                        const base64Audio = btoa(
-                            String.fromCharCode(...new Uint8Array(arrayBuffer))
-                        );
-                        socket.emit("audio_data", { audio: base64Audio });
-                    }
-                };
-
-                source.connect(processor);
-                processor.connect(audioContext.destination);
-                window.audioStream = stream;
-                window.audioContext = audioContext;
-                window.audioProcessor = processor;
-                socket.emit("start_recording");
-            } catch (error) {
-                console.error("Error starting recording:", error);
-                appendReplyMessage("Error: Microphone access issue.");
-            }
-        }
-
-        function stopRecording() {
-            if (window.audioStream)
-                window.audioStream.getTracks().forEach((track) => track.stop());
-            if (window.audioProcessor) window.audioProcessor.disconnect();
-            if (window.audioContext) window.audioContext.close();
-            window.audioStream = null;
-            window.audioContext = null;
-            window.audioProcessor = null;
-            socket.emit("stop_recording");
-        }
-
-        startSessionBtn.addEventListener("click", () => {
-            console.log("[USER] Start Conversation button clicked");
-            socket.emit("start_nova_session");
-            appendReplyMessage("Starting conversation with Alan...");
+        audioPlayer.src = audioUrl;
+        audioPlayer.play().catch((e) => {
+          console.error("Audio play failed:", e);
+          isPlaying = false;
         });
 
-        endSessionBtn.addEventListener("click", () => {
-            console.log("[USER] End Conversation button clicked");
-            if (isRecording) stopRecording();
-            socket.emit("end_nova_session");
-            resetUI();
-            appendReplyMessage("Conversation ended.");
-        });
+        audioPlayer.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          playNextAudio();
+        };
+      }
 
-        micBtn.addEventListener("click", () => {
-            if (!isSessionActive) return;
-            if (!isRecording) {
-                startRecording();
-                isRecording = true;
-                micBtn.classList.add("recording");
-            } else {
-                stopRecording();
-                isRecording = false;
-                micBtn.classList.remove("recording");
+      function clearAudioQueue() {
+        audioQueue.length = 0;
+        isPlaying = false;
+        audioPlayer.pause();
+        audioPlayer.src = "";
+      }
+
+      function base64ToBlob(base64, mimeType) {
+        const byteCharacters = atob(base64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        return new Blob([byteArray], { type: mimeType });
+      }
+
+      async function startRecording() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          const audioContext = new AudioContext({ sampleRate: 16000 });
+          const source = audioContext.createMediaStreamSource(stream);
+          const processor = audioContext.createScriptProcessor(4096, 1, 1);
+
+          processor.onaudioprocess = function (e) {
+            if (isRecording) {
+              const inputData = e.inputBuffer.getChannelData(0);
+              const int16Data = new Int16Array(inputData.length);
+              for (let i = 0; i < inputData.length; i++) {
+                int16Data[i] = Math.max(
+                  -32768,
+                  Math.min(32767, inputData[i] * 32768)
+                );
+              }
+              const arrayBuffer = int16Data.buffer;
+              const base64Audio = btoa(
+                String.fromCharCode(...new Uint8Array(arrayBuffer))
+              );
+              socket.emit("audio_data", { audio: base64Audio });
             }
+          };
+
+          source.connect(processor);
+          processor.connect(audioContext.destination);
+          window.audioStream = stream;
+          window.audioContext = audioContext;
+          window.audioProcessor = processor;
+          socket.emit("start_recording");
+        } catch (error) {
+          console.error("Error starting recording:", error);
+          appendReplyMessage("Error: Microphone access issue.");
+        }
+      }
+
+      function stopRecording() {
+        if (window.audioStream)
+          window.audioStream.getTracks().forEach((track) => track.stop());
+        if (window.audioProcessor) window.audioProcessor.disconnect();
+        if (window.audioContext) window.audioContext.close();
+        window.audioStream = null;
+        window.audioContext = null;
+        window.audioProcessor = null;
+        socket.emit("stop_recording");
+      }
+
+      startSessionBtn.addEventListener("click", () => {
+        console.log("[USER] Start Conversation button clicked");
+        socket.emit("start_nova_session");
+        appendReplyMessage("Starting conversation with Alan...");
+      });
+
+      endSessionBtn.addEventListener("click", () => {
+        console.log("[USER] End Conversation button clicked");
+        if (isRecording) stopRecording();
+        socket.emit("end_nova_session");
+        resetUI();
+        appendReplyMessage("Conversation ended.");
+      });
+
+      micBtn.addEventListener("click", () => {
+        if (!isSessionActive) return;
+        if (!isRecording) {
+          startRecording();
+          isRecording = true;
+          micBtn.classList.add("recording");
+        } else {
+          stopRecording();
+          isRecording = false;
+          micBtn.classList.remove("recording");
+        }
+      });
+
+      // View Summary Button Handler
+      document
+        .getElementById("viewSummaryBtn")
+        .addEventListener("click", function () {
+          if (!final_summary) {
+            alert(
+              "Summary not yet generated. Please wait for processing to complete."
+            );
+            return;
+          }
+
+          // Enhanced summary display with better formatting
+          const formattedSummary = formatSummaryReport(final_summary);
+          document.getElementById("summaryModalBody").innerHTML =
+            formattedSummary;
+          const summaryModal = new bootstrap.Modal(
+            document.getElementById("summaryModal")
+          );
+          summaryModal.show();
         });
 
-
-        // View Summary Button Handler
-        document.getElementById('viewSummaryBtn').addEventListener('click', function() {
-            if (!final_summary) {
-                alert('Summary not yet generated. Please wait for processing to complete.');
-                return;
-            }
-            
-            // Enhanced summary display with better formatting
-            const formattedSummary = formatSummaryReport(final_summary);
-            document.getElementById('summaryModalBody').innerHTML = formattedSummary;
-            const summaryModal = new bootstrap.Modal(document.getElementById('summaryModal'));
-            summaryModal.show();
-        });
-        
-        function formatSummaryReport(summary) {
-            return `
+      function formatSummaryReport(summary) {
+        return `
                 <div class="summary-report">
                     <div class="summary-header">
                         <h4><i class="bi bi-file-text me-2"></i>Underwriting Analysis Report</h4>
@@ -1596,120 +1745,137 @@
                     </div>
                 </div>
             `;
-        }
+      }
 
-        // Print Summary Button Handler
-        document.getElementById('printSummaryBtn').addEventListener('click', function() {
-            const printContent = document.getElementById('summaryModalBody').innerHTML;
-            const printWindow = window.open('', '', 'height=600,width=800');
-            printWindow.document.write('<html><head><title>Underwriting Summary Report</title>');
-            printWindow.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">');
-            printWindow.document.write('<style>body { padding: 20px; } table { margin-bottom: 20px; }</style>');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write(printContent);
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.print();
+      // Print Summary Button Handler
+      document
+        .getElementById("printSummaryBtn")
+        .addEventListener("click", function () {
+          const printContent =
+            document.getElementById("summaryModalBody").innerHTML;
+          const printWindow = window.open("", "", "height=600,width=800");
+          printWindow.document.write(
+            "<html><head><title>Underwriting Summary Report</title>"
+          );
+          printWindow.document.write(
+            '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">'
+          );
+          printWindow.document.write(
+            "<style>body { padding: 20px; } table { margin-bottom: 20px; }</style>"
+          );
+          printWindow.document.write("</head><body>");
+          printWindow.document.write(printContent);
+          printWindow.document.write("</body></html>");
+          printWindow.document.close();
+          printWindow.print();
         });
 
-        document.getElementById('getPolicyBtn').addEventListener('click', function() {
-            console.log('[DEBUG] Get Policy clicked');
-            console.log('[DEBUG] Current session ID:', currentSessionId);
-            
-            if (!currentSessionId) {
-                alert('No active session found. Please complete the underwriting process first.');
-                return;
-            }
-            
-            fetch(`/policy_status/${currentSessionId}`)
-                .then(response => {
-                    console.log('[DEBUG] Policy status response:', response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('[DEBUG] Policy status data:', data);
-                    if (data.status === 'success' && data.policy_generated) {
-                        const downloadUrl = `/download_policy/${currentSessionId}`;
-                        
-                        const downloadLink = document.createElement('a');
-                        downloadLink.href = downloadUrl;
-                        downloadLink.download = `policy_${currentSessionId}.pdf`;
-                        document.body.appendChild(downloadLink);
-                        downloadLink.click();
-                        document.body.removeChild(downloadLink);
-                        
-                        window.open(`/view_policy/${currentSessionId}`, '_blank');
-                        
-                        appendReplyMessage(`
+      document
+        .getElementById("getPolicyBtn")
+        .addEventListener("click", function () {
+          console.log("[DEBUG] Get Policy clicked");
+          console.log("[DEBUG] Current session ID:", currentSessionId);
+
+          if (!currentSessionId) {
+            alert(
+              "No active session found. Please complete the underwriting process first."
+            );
+            return;
+          }
+
+          fetch(`/policy_status/${currentSessionId}`)
+            .then((response) => {
+              console.log("[DEBUG] Policy status response:", response.status);
+              return response.json();
+            })
+            .then((data) => {
+              console.log("[DEBUG] Policy status data:", data);
+              if (data.status === "success" && data.policy_generated) {
+                const downloadUrl = `/download_policy/${currentSessionId}`;
+
+                const downloadLink = document.createElement("a");
+                downloadLink.href = downloadUrl;
+                downloadLink.download = `policy_${currentSessionId}.pdf`;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+
+                window.open(`/view_policy/${currentSessionId}`, "_blank");
+
+                appendReplyMessage(`
                             <div class="alert alert-success mt-2">
                                 <i class="bi bi-download me-1"></i>
                                 Policy downloaded and opened in a new tab!
                             </div>
                         `);
-                    } else {
-                        alert('Policy document is not yet available. Please wait for processing to complete.');
-                    }
-                })
-                .catch(error => {
-                    console.error('[ERROR] Error checking policy status:', error);
-                    appendReplyMessage(`
+              } else {
+                alert(
+                  "Policy document is not yet available. Please wait for processing to complete."
+                );
+              }
+            })
+            .catch((error) => {
+              console.error("[ERROR] Error checking policy status:", error);
+              appendReplyMessage(`
                         <div class="alert alert-danger mt-2">
                             <i class="bi bi-exclamation-triangle me-1"></i>
                             Error: ${error.message}. Check console for details.
                         </div>
                     `);
-                });
+            });
         });
 
-        function appendUserMessage(message) {
-            const chatContainer = document.getElementById("chatMessages");
+      function appendUserMessage(message) {
+        const chatContainer = document.getElementById("chatMessages");
 
-            const li = document.createElement("li");
-            li.className = "chat-message user";
+        const li = document.createElement("li");
+        li.className = "chat-message user";
 
-            const card = document.createElement("div");
-            card.className = "message-card user";
-            card.innerHTML = `<p class="mb-0">${message}</p>`;
+        const card = document.createElement("div");
+        card.className = "message-card user";
+        card.innerHTML = `<p class="mb-0">${message}</p>`;
 
-            const avatar = document.createElement("img");
-            avatar.src = "/static/images/chatbotava.png";
-            avatar.alt = "User Avatar";
-            avatar.className = "message-avatar";
+        const avatar = document.createElement("img");
+        avatar.src =
+          "{{ url_for('static', filename='images/chatbotava.png') }}";
+        avatar.alt = "User Avatar";
+        avatar.className = "message-avatar";
 
-            li.appendChild(card);
-            li.appendChild(avatar);
-            chatContainer.appendChild(li);
-            
-            // Auto-scroll to bottom with a small delay to ensure DOM is updated
-            setTimeout(() => {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }, 100);
-        }
+        li.appendChild(card);
+        li.appendChild(avatar);
+        chatContainer.appendChild(li);
 
-        function appendReplyMessage(reply) {
-            const chatContainer = document.getElementById("chatMessages");
+        // Auto-scroll to bottom with a small delay to ensure DOM is updated
+        setTimeout(() => {
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        }, 100);
+      }
 
-            const li = document.createElement("li");
-            li.className = "chat-message";
+      function appendReplyMessage(reply) {
+        const chatContainer = document.getElementById("chatMessages");
 
-            const avatar = document.createElement("img");
-            avatar.src = "/static/images/chatbotava.png";
-            avatar.alt = "Assistant Avatar";
-            avatar.className = "message-avatar";
+        const li = document.createElement("li");
+        li.className = "chat-message";
 
-            const card = document.createElement("div");
-            card.className = "message-card";
-            card.innerHTML = `<p class="mb-0">${reply}</p>`;
+        const avatar = document.createElement("img");
+        avatar.src =
+          "{{ url_for('static', filename='images/chatbotava.png') }}";
+        avatar.alt = "Assistant Avatar";
+        avatar.className = "message-avatar";
 
-            li.appendChild(avatar);
-            li.appendChild(card);
-            chatContainer.appendChild(li);
-            
-            // Auto-scroll to bottom with a small delay to ensure DOM is updated
-            setTimeout(() => {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }, 100);
-        }
+        const card = document.createElement("div");
+        card.className = "message-card";
+        card.innerHTML = `<p class="mb-0">${reply}</p>`;
+
+        li.appendChild(avatar);
+        li.appendChild(card);
+        chatContainer.appendChild(li);
+
+        // Auto-scroll to bottom with a small delay to ensure DOM is updated
+        setTimeout(() => {
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        }, 100);
+      }
     </script>
-</body>
+  </body>
 </html>
