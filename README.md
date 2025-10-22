@@ -37,7 +37,6 @@ The live demo of this code is hosted on https://daiportal.trianz.com/nova-agent
 7. Lifestyle Analysis  
 8. Summary Generation  
 
-**Policy Layer:** Auto-generates formatted policy documents and uploads them to S3.
 
 ---
 
@@ -51,7 +50,7 @@ The live demo of this code is hosted on https://daiportal.trianz.com/nova-agent
 ---
 
 ## 🧰 Technical Stack
-- **AWS Services:** Bedrock AgentCore, Nova Sonic, Nova Pro, S3, IAM  
+- **AWS Services:** Bedrock AgentCore, Bedrock Models, Nova Sonic, Nova Pro, S3, IAM  
 - **Backend:** Python 3.10+, Flask, Boto3, Flask-SocketIO  
 - **Frontend:** HTML5, CSS3, JavaScript, Bootstrap 5  
 - **Tools:** Git, dotenv, asyncio, threading  
@@ -86,8 +85,6 @@ python run.py
 # Open your browser and navigate to:
 # Go to http://127.0.0.1:8080/login, enter valid credentials, and the main page will open.
 
-
-
 ## System Workflow
 1. **Voice Intake:** Collects applicant data using *Nova Sonic*  
 2. **Document Upload:** ZIP file sent to S3, triggers *AgentCore*  
@@ -97,10 +94,6 @@ python run.py
 
 **Total Processing Time:** ~2–3 minutes  
 
----
-
-## Agents Summary
-Each agent performs a specialized underwriting function — from data extraction and risk scoring to compliance validation and final summary generation — ensuring a **thorough**, **consistent**, and **transparent** process.
 
 ---
 
@@ -108,13 +101,12 @@ Each agent performs a specialized underwriting function — from data extraction
 - **Processing:** 2–3 minutes end-to-end  
 - **Resource Usage:** Lightweight client-side; cloud-based heavy lifting  
 - **Security:** Encrypted S3 storage, session isolation, IAM-based access  
-- **Compliance:** HIPAA-ready data handling and full audit logging  
 
 ---
 
 ## Future Enhancements
 - Multi-language voice support  
-- Fraud detection and external data integrations  
+- External data integrations  
 - Real-time premium calculation  
 - Mobile and customer portal extensions  
 
