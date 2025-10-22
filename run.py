@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, jsonify, send_file
+from flask import Flask, request, render_template, jsonify, session, redirect, url_for
 from flask_socketio import SocketIO, emit, join_room
 import os
 import json
@@ -17,6 +17,7 @@ from botocore.exceptions import NoCredentialsError, ClientError
 from nova_sonic_underwriting import NovaTrianzUnderwritingHandler
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your-secret-key-here-change-in-production'
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
@@ -197,69 +198,93 @@ def read_agent_status_from_s3(session_id):
         else:
             raise e
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        next_page = request.form.get('next', url_for('index_new'))
+ 
+        if username == 'demo_trianz' and password == 'Demo@#123':
+            session['logged_in'] = True
+            return redirect(next_page)  
+        else:
+            error = 'Invalid username or password'
+            return render_template('login.html', error=error)
+ 
+    # Get the next parameter from URL
+    next_page = request.args.get('next', url_for('index_new'))
+    return render_template('login.html', next=next_page)
+ 
+ 
+# Add new route for modern UI
+@app.route('/new')
+def index_new():
+    if 'logged_in' not in session or not session['logged_in']:
+        return redirect(url_for('login', next=url_for('index_new')))
+    return render_template('index-new.html')
 
+# Keep original route unchanged
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if request.method == 'GET':
-        return render_template('index.html')
+    if 'logged_in' not in session or not session['logged_in']:
+        return redirect(url_for('login'))  
+
+    if request.method == 'POST':
+        try:
+           
+            if 'zipFileInput' not in request.files:
+                return render_template('index.html', error='No file uploaded. Please select a ZIP file.')
+            file = request.files['zipFileInput']
+          
+            is_valid, message = validate_zip_file(file)
+            if not is_valid:
+                return render_template('index.html', error=message)
+            print(f"[INFO] File validation successful: {message}")
+           
+            session_id = generate_session_id()
+            original_filename = file.filename
+            safe_filename = f"{session_id}_upload.zip"
+            print(f"[INFO] Generated session ID: {session_id}")
+           
+            upload_success, s3_result = upload_to_s3(file, session_id, safe_filename)
+            if not upload_success:
+                return render_template('index.html', 
+                                     error=f'Failed to upload file to S3: {s3_result}')
+            s3_key = s3_result
+            print(f"[INFO] File uploaded to S3: {s3_key}")
+           
+            socketio.emit('upload_complete', {
+                'session_id': session_id,
+                's3_key': s3_key,
+                'message': 'File uploaded to S3 successfully'
+            })
+           
+            trigger_success = trigger_agentcore_processing(session_id, s3_key)
+            if not trigger_success:
+                return render_template('index.html', 
+                                     error='File uploaded but failed to start processing')
+            
+            socketio.emit('processing_started', {
+                'session_id': session_id,
+                'message': 'AgentCore processing started...'
+            })
+           
+            monitor_thread = threading.Thread(target=monitor_s3_agent_status, args=(session_id,))
+            monitor_thread.daemon = True
+            monitor_thread.start()
+           
+            return render_template('index.html', 
+                                 processing=True,
+                                 session_id=session_id,
+                                 s3_key=s3_key)
+        except Exception as e:
+            error_message = f"Request processing failed: {str(e)}"
+            print(f"[ERROR] {error_message}")
+            return render_template('index.html', error=error_message)
+ 
     
-    try:
-        if 'zipFileInput' not in request.files:
-            return render_template('index.html', error='No file uploaded. Please select a ZIP file.')
-        
-        file = request.files['zipFileInput']
-        
-        is_valid, message = validate_zip_file(file)
-        if not is_valid:
-            return render_template('index.html', error=message)
-        
-        print(f"[INFO] File validation successful: {message}")
-        
-        session_id = generate_session_id()
-        original_filename = file.filename
-        safe_filename = f"{session_id}_upload.zip"
-        
-        print(f"[INFO] Generated session ID: {session_id}")
-        
-        upload_success, s3_result = upload_to_s3(file, session_id, safe_filename)
-        
-        if not upload_success:
-            return render_template('index.html', 
-                                 error=f'Failed to upload file to S3: {s3_result}')
-        
-        s3_key = s3_result
-        print(f"[INFO] File uploaded to S3: {s3_key}")
-        
-        socketio.emit('upload_complete', {
-            'session_id': session_id,
-            's3_key': s3_key,
-            'message': 'File uploaded to S3 successfully'
-        })
-        
-        trigger_success = trigger_agentcore_processing(session_id, s3_key)
-        
-        if not trigger_success:
-            return render_template('index.html', 
-                                 error='File uploaded but failed to start processing')
-        
-        socketio.emit('processing_started', {
-            'session_id': session_id,
-            'message': 'AgentCore processing started...'
-        })
-        
-        monitor_thread = threading.Thread(target=monitor_s3_agent_status, args=(session_id,))
-        monitor_thread.daemon = True
-        monitor_thread.start()
-        
-        return render_template('index.html', 
-                             processing=True,
-                             session_id=session_id,
-                             s3_key=s3_key)
-        
-    except Exception as e:
-        error_message = f"Request processing failed: {str(e)}"
-        print(f"[ERROR] {error_message}")
-        return render_template('index.html', error=error_message)
+    return render_template('index.html')
 
 
 @app.route('/upload/<session_id>', methods=['GET', 'POST'])
