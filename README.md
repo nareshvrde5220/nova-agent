@@ -111,16 +111,3 @@ python run.py
 - Mobile and customer portal extensions  
 
 ---
-
-## Support
-For issues:
-- Check **CloudWatch** logs  
-- Verify **Bedrock model access**  
-- Ensure **S3 permissions** and **AWS credentials**  
-
----
-
-## Acknowledgments
-**AWS Bedrock**, **Amazon Nova AI Models**, **Flask & Socket.IO Community**, **Python Open Source Ecosystem**.
-
----
