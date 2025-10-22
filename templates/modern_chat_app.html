@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trianz Summarization Tool</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Google Fonts - Jost -->
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Socket.IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+    <style>
+        :root {
+            --brand-primary: #0062E6;
+            --brand-blue: #0062E6;
+            --accent: #ff7a00;
+            --gradient-bg: linear-gradient(89.88deg, #db05e7 .11%, #3545d9 45.01%, #0e8bd9 99.89%);
+            --gradient-light: linear-gradient(135deg, rgba(219, 5, 231, 0.1) 0%, rgba(53, 69, 217, 0.1) 50%, rgba(14, 139, 217, 0.1) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Jost', sans-serif;
+            background: var(--gradient-bg);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--brand-primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: var(--gradient-bg);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Main Container */
+        .chat-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .welcome-section h1 {
+            font-weight: 700;
+            font-size: 2.5rem;
+            background: var(--gradient-bg);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-section p {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-card {
+            background: var(--gradient-light);
+            border-radius: 16px;
+            padding: 2rem;
+            height: 100%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-bg);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h5 {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-card p {
+            color: #666;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* Chat Box */
+        .chat-box {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: var(--gradient-bg);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h5 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .session-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #fff;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .chat-messages {
+            padding: 2rem;
+            height: 60vh;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.2rem;
+        }
+
+        .user-avatar {
+            background: var(--gradient-bg);
+            color: white;
+        }
+
+        .bot-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-bubble {
+            background: white;
+            padding: 1rem 1.25rem;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            max-width: 80%;
+        }
+
+        .message.user .message-bubble {
+            background: var(--gradient-bg);
+            color: white;
+            margin-left: auto;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 0.5rem;
+        }
+
+        /* Controls */
+        .chat-controls {
+            padding: 1.5rem 2rem;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-primary {
+            background: var(--brand-primary);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--brand-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 98, 230, 0.3);
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-accent:hover {
+            background: #e66d00;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 122, 0, 0.3);
+        }
+
+        .btn-success {
+            background: #10b981;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
+        }
+
+        .mic-button {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: none;
+            background: var(--gradient-bg);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .mic-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .mic-button:active {
+            transform: scale(0.95);
+        }
+
+        .mic-button.recording {
+            animation: recordPulse 1.5s infinite;
+        }
+
+        @keyframes recordPulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 20px rgba(239, 68, 68, 0);
+            }
+        }
+
+        /* Modal */
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            background: var(--gradient-bg);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            border: none;
+            padding: 1.5rem 2rem;
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .welcome-section {
+                padding: 2rem 1.5rem;
+            }
+
+            .welcome-section h1 {
+                font-size: 2rem;
+            }
+
+            .chat-messages {
+                height: 50vh;
+            }
+
+            .message-bubble {
+                max-width: 90%;
+            }
+
+            .feature-card {
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Loading Animation */
+        .typing-indicator {
+            display: flex;
+            gap: 0.4rem;
+            padding: 1rem 1.25rem;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--brand-primary);
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-stars me-2"></i>Trianz Summarization Tool
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="chat-container">
+        <!-- Welcome Section -->
+        <div class="welcome-section" id="welcomeSection">
+            <h1><i class="bi bi-robot me-2"></i>AI-Powered Conversation Assistant</h1>
+            <p>Experience intelligent conversation summarization with real-time voice interaction and advanced AI capabilities.</p>
+            
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-mic-fill"></i>
+                        </div>
+                        <h5>Voice Recognition</h5>
+                        <p>Speak naturally and let our AI transcribe your conversations with high accuracy.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-lightning-charge-fill"></i>
+                        </div>
+                        <h5>Real-time Processing</h5>
+                        <p>Get instant responses and summaries powered by advanced language models.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-file-earmark-text-fill"></i>
+                        </div>
+                        <h5>Smart Summaries</h5>
+                        <p>Automatically generate comprehensive summaries of your conversations.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button class="btn btn-primary btn-lg" id="startSessionBtn">
+                    <i class="bi bi-play-circle-fill me-2"></i>Start New Session
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Box (Hidden by default) -->
+        <div class="chat-box h-100" id="chatBox" style="display: none;">
+            <div class="chat-header">
+                <div>
+                    <h5><i class="bi bi-chat-dots-fill me-2"></i>Active Session</h5>
+                    <div class="session-status">
+                        <div class="status-indicator"></div>
+                        <span>Recording Active</span>
+                    </div>
+                </div>
+                <button class="btn btn-danger btn-sm" id="endSessionBtn">
+                    <i class="bi bi-stop-circle-fill me-1"></i>End Session
+                </button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages will appear here -->
+            </div>
+
+            <div class="chat-controls">
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center mb-3 mb-md-0">
+                        <button class="mic-button" id="micBtn" title="Push to talk">
+                            <i class="bi bi-mic-fill"></i>
+                        </button>
+                        <small class="d-block mt-2 text-muted">Hold to speak</small>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="d-flex gap-2 justify-content-center justify-content-md-end flex-wrap">
+                            <button class="btn btn-accent" id="generateSummaryBtn">
+                                <i class="bi bi-file-text-fill me-1"></i>Generate Summary
+                            </button>
+                            <button class="btn btn-success" id="regenerateAudioBtn">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Regenerate Audio
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Modal -->
+    <div class="modal fade" id="summaryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-file-earmark-text-fill me-2"></i>Conversation Summary
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="summaryContent">
+                        <div class="text-center py-5">
+                            <div class="typing-indicator d-inline-flex">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <p class="mt-3 text-muted">Generating summary...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Player (Hidden) -->
+    <audio id="audioPlayer" style="display: none;"></audio>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom Script (Same logic as original) -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const socket = io();
+            const micBtn = document.getElementById("micBtn");
+            const startSessionBtn = document.getElementById("startSessionBtn");
+            const endSessionBtn = document.getElementById("endSessionBtn");
+            const chatBox = document.getElementById("chatBox");
+            const welcomeSection = document.getElementById("welcomeSection");
+            const chatMessages = document.getElementById("chatMessages");
+            const audioPlayer = document.getElementById("audioPlayer");
+            const generateSummaryBtn = document.getElementById("generateSummaryBtn");
+            const regenerateAudioBtn = document.getElementById("regenerateAudioBtn");
+
+            let isRecording = false;
+            let isSessionActive = false;
+            let currentSessionId = null;
+            let mediaRecorder = null;
+            let audioChunks = [];
+
+            // Socket connection
+            socket.on("connect", () => {
+                console.log("Socket.IO connected");
+                startSessionBtn.disabled = false;
+            });
+
+            socket.on("connect_error", (error) => {
+                console.error("Socket.IO connection error:", error);
+            });
+
+            // Start Session
+            startSessionBtn.addEventListener("click", () => {
+                socket.emit("start_session");
+            });
+
+            socket.on("session_started", (data) => {
+                console.log("Session started:", data);
+                currentSessionId = data.session_id;
+                isSessionActive = true;
+                welcomeSection.style.display = "none";
+                chatBox.style.display = "block";
+                chatMessages.innerHTML = "";
+                addMessage("bot", "Session started! You can now speak by holding the microphone button.");
+            });
+
+            // End Session
+            endSessionBtn.addEventListener("click", () => {
+                if (currentSessionId) {
+                    socket.emit("end_session", { session_id: currentSessionId });
+                }
+            });
+
+            socket.on("session_ended", (data) => {
+                console.log("Session ended:", data);
+                isSessionActive = false;
+                currentSessionId = null;
+                chatBox.style.display = "none";
+                welcomeSection.style.display = "block";
+                addMessage("bot", "Session ended. Thank you!");
+            });
+
+            // Microphone recording
+            micBtn.addEventListener("mousedown", startRecording);
+            micBtn.addEventListener("mouseup", stopRecording);
+            micBtn.addEventListener("mouseleave", stopRecording);
+            micBtn.addEventListener("touchstart", startRecording);
+            micBtn.addEventListener("touchend", stopRecording);
+
+            async function startRecording() {
+                if (!isSessionActive || isRecording) return;
+
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+                        sendAudioToServer(audioBlob);
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    micBtn.classList.add("recording");
+                    micBtn.innerHTML = '<i class="bi bi-record-circle-fill"></i>';
+                } catch (error) {
+                    console.error("Error accessing microphone:", error);
+                    alert("Could not access microphone. Please check permissions.");
+                }
+            }
+
+            function stopRecording() {
+                if (!isRecording) return;
+
+                mediaRecorder.stop();
+                isRecording = false;
+                micBtn.classList.remove("recording");
+                micBtn.innerHTML = '<i class="bi bi-mic-fill"></i>';
+            }
+
+            function sendAudioToServer(audioBlob) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const base64Audio = reader.result.split(",")[1];
+                    socket.emit("audio_data", {
+                        session_id: currentSessionId,
+                        audio: base64Audio,
+                    });
+                };
+                reader.readAsDataURL(audioBlob);
+            }
+
+            // Receive transcription
+            socket.on("transcription", (data) => {
+                console.log("Transcription:", data);
+                if (data.text) {
+                    addMessage("user", data.text);
+                }
+            });
+
+            // Receive AI response
+            socket.on("ai_response", (data) => {
+                console.log("AI Response:", data);
+                if (data.text) {
+                    addMessage("bot", data.text);
+                }
+                if (data.audio) {
+                    playAudio(data.audio);
+                }
+            });
+
+            // Generate Summary
+            generateSummaryBtn.addEventListener("click", () => {
+                if (currentSessionId) {
+                    socket.emit("generate_summary", { session_id: currentSessionId });
+                    const summaryModal = new bootstrap.Modal(document.getElementById("summaryModal"));
+                    summaryModal.show();
+                    document.getElementById("summaryContent").innerHTML = `
+                        <div class="text-center py-5">
+                            <div class="typing-indicator d-inline-flex">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <p class="mt-3 text-muted">Generating summary...</p>
+                        </div>
+                    `;
+                }
+            });
+
+            socket.on("summary_generated", (data) => {
+                console.log("Summary:", data);
+                const summaryContent = document.getElementById("summaryContent");
+                summaryContent.innerHTML = `
+                    <div class="summary-text">
+                        <p>${data.summary.replace(/\n/g, '<br>')}</p>
+                    </div>
+                `;
+            });
+
+            // Regenerate Audio
+            regenerateAudioBtn.addEventListener("click", () => {
+                if (currentSessionId) {
+                    socket.emit("regenerate_audio", { session_id: currentSessionId });
+                    addMessage("bot", "Regenerating audio response...");
+                }
+            });
+
+            socket.on("audio_regenerated", (data) => {
+                console.log("Audio regenerated");
+                if (data.audio) {
+                    playAudio(data.audio);
+                    addMessage("bot", "Audio has been regenerated and is now playing.");
+                }
+            });
+
+            // Helper Functions
+            function addMessage(sender, text) {
+                const messageDiv = document.createElement("div");
+                messageDiv.className = `message ${sender}`;
+                
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                messageDiv.innerHTML = `
+                    <div class="message-avatar ${sender}-avatar">
+                        <i class="bi bi-${sender === 'user' ? 'person-fill' : 'robot'}"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            ${text}
+                        </div>
+                        <div class="message-time">${time}</div>
+                    </div>
+                `;
+                
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function playAudio(base64Audio) {
+                const audioBlob = base64ToBlob(base64Audio, "audio/mp3");
+                const audioUrl = URL.createObjectURL(audioBlob);
+                audioPlayer.src = audioUrl;
+                audioPlayer.play();
+            }
+
+            function base64ToBlob(base64, mimeType) {
+                const byteCharacters = atob(base64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                return new Blob([byteArray], { type: mimeType });
+            }
+
+            // Error handling
+            socket.on("error", (data) => {
+                console.error("Server error:", data);
+                addMessage("bot", `Error: ${data.message}`);
+            });
+        });
+    </script>
+</body>
+</html>
