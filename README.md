@@ -11,6 +11,8 @@
 The **AI-Powered Insurance Front Door** is an intelligent, end-to-end underwriting automation platform designed to reduce policy processing time from **7–14 days to just 3 minutes**.  
 Built using **AWS Bedrock AgentCore** and **Amazon Nova AI models**, it provides seamless **voice-based data intake**, automated **document analysis**, and instant **policy generation** through orchestrated multi-agent processing.
 
+The live demo of this code is hosted on https://daiportal.trianz.com/nova-agent
+
 ---
 
 ## ⚙️ System Highlights
