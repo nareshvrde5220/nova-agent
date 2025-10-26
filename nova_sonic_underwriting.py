@@ -612,7 +612,7 @@ KEY:
             import os
             region = os.environ.get('AWS_REGION', 'us-east-1')
             s3_client = boto3.client('s3', region_name=region)
-            s3_bucket = 'nyl-underwriting-documents-121409194654'
+            s3_bucket = 'trianz-aws-hackathon'
             
             s3_key = f"{self.session_id}/conversation_context.json"
             

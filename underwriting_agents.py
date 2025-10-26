@@ -69,7 +69,7 @@ def initialize_nova_pro():
         
         # Initialize BedrockModel with explicit credentials
         try:
-            # Method 1: Let BedrockModel use environment variables
+            
             nova_pro = BedrockModel(
                 model_id="amazon.nova-pro-v1:0",
                 region_name=region
@@ -95,7 +95,7 @@ def initialize_nova_pro():
         except Exception as e:
             print(f"[ERROR] Nova Pro initialization failed: {e}")
             
-            # Method 2: Alternative initialization
+           
             try:
                 nova_pro = BedrockModel("us.amazon.nova-pro-v1:0")
                 print("[INFO] Nova Pro initialized with fallback method")
@@ -119,7 +119,7 @@ else:
 def safe_model_call(agent, prompt, max_retries=3):
     """Safely call model with enhanced error handling for session tokens"""
     
-    # Pre-flight credential check
+    
     is_valid, _ = validate_aws_credentials()
     if not is_valid:
         return "Error: AWS credentials not available or expired. Please refresh your credentials."
@@ -129,7 +129,7 @@ def safe_model_call(agent, prompt, max_retries=3):
             with suppress_output():
                 result = agent(prompt)
                 
-            # Validate result
+           
             if result and len(str(result)) > 10:
                 return result
             else:
@@ -172,7 +172,7 @@ class UnderwritingContext:
         self.processing_start_time = None
         self.document_content = ""
         self.s3_client = boto3.client('s3')
-        self.s3_bucket = "nyl-underwriting-documents-121409194654"
+        self.s3_bucket = "trianz-aws-hackathon"
     
     def set_session_id(self, session_id: str):
         self.session_id = session_id
@@ -399,7 +399,6 @@ def log_agent_status(agent_name: str, status: str, details=None):
     if details:
         print(f"        {details}")
 
-# Agent Definitions with Nova Pro Intelligence
 def create_agents():
     """Create all agents with null check"""
     if nova_pro is None:
@@ -408,7 +407,7 @@ def create_agents():
     
     data_intake_agent = Agent(
         model=nova_pro,
-        system_prompt=f"""You are a Senior Data Intake Specialist for NYL Insurance underwriting operations. Your expertise involves document ingestion, initial processing, and data organization for comprehensive underwriting analysis.
+        system_prompt=f"""You are a Senior Data Intake Specialist for Trianz Insurance underwriting operations. Your expertise involves document ingestion, initial processing, and data organization for comprehensive underwriting analysis.
 
 OPERATIONAL GUIDELINES:
 Coverage Limits: {UNDERWRITING_GUIDELINES['coverage_limits']['min_coverage']} to {UNDERWRITING_GUIDELINES['coverage_limits']['max_coverage']} USD
@@ -439,7 +438,7 @@ Your intake analysis establishes the foundation for comprehensive underwriting e
 
     document_verification_agent = Agent(
         model=nova_pro,
-        system_prompt=f"""You are a Document Verification Specialist for NYL Insurance with expertise in document authenticity assessment, completeness verification, and regulatory compliance validation.
+        system_prompt=f"""You are a Document Verification Specialist for Trianz Insurance with expertise in document authenticity assessment, completeness verification, and regulatory compliance validation.
 
 REQUIRED DOCUMENT STANDARDS:
 Application Form: {REQUIRED_DOCUMENTS['application_form']}
@@ -476,7 +475,7 @@ Your verification ensures all submissions meet regulatory standards and company 
 
     medical_risk_assessment_agent = Agent(
         model=nova_pro,
-        system_prompt=f"""You are a Senior Medical Risk Assessment Specialist for NYL Insurance with extensive experience in medical underwriting, mortality risk evaluation, and health condition analysis.
+        system_prompt=f"""You are a Senior Medical Risk Assessment Specialist for Trianz Insurance with extensive experience in medical underwriting, mortality risk evaluation, and health condition analysis.
 
 MEDICAL RISK PARAMETERS:
 Health Risk Indicators: {RISK_SCORING_RULES['health_risk_indicators']}
@@ -511,7 +510,7 @@ Your medical analysis determines the health-based risk classification for covera
 
     financial_agent = Agent(
         model=nova_pro,
-        system_prompt=f"""You are a Financial Underwriting Specialist for NYL Insurance specializing in financial capacity analysis, coverage appropriateness assessment, and anti-selection risk evaluation.
+        system_prompt=f"""You are a Financial Underwriting Specialist for trianz Insurance specializing in financial capacity analysis, coverage appropriateness assessment, and anti-selection risk evaluation.
 
 FINANCIAL UNDERWRITING PARAMETERS:
 Income Multiplier Guideline: {UNDERWRITING_GUIDELINES['financial_ratios']['income_multiplier']}x annual income
@@ -547,7 +546,7 @@ Your financial analysis ensures coverage amounts are appropriate and financially
 
     driving_agent = Agent(
         model=nova_pro,
-        system_prompt=f"""You are a Motor Vehicle Records Specialist for NYL Insurance with expertise in driving history evaluation, traffic violation assessment, and transportation-related mortality risk analysis.
+        system_prompt=f"""You are a Motor Vehicle Records Specialist for Trianz Insurance with expertise in driving history evaluation, traffic violation assessment, and transportation-related mortality risk analysis.
 
 DRIVING ASSESSMENT PARAMETERS:
 Required Coverage Threshold: {REQUIRED_DOCUMENTS['driving_records']['required_if']}
@@ -582,7 +581,7 @@ Your driving analysis identifies transportation-related risks that may impact li
 
     compliance_agent = Agent(
         model=nova_pro,
-        system_prompt=f"""You are a Regulatory Compliance Specialist for NYL Insurance ensuring all underwriting activities meet federal, state, and company regulatory requirements.
+        system_prompt=f"""You are a Regulatory Compliance Specialist for Trianz Insurance ensuring all underwriting activities meet federal, state, and company regulatory requirements.
 
 COMPLIANCE FRAMEWORK:
 Required Documents: {REQUIRED_DOCUMENTS}
@@ -617,7 +616,7 @@ Your compliance analysis ensures all underwriting activities meet legal standard
 
     lifestyle_behavioral_agent = Agent(
         model=nova_pro,
-        system_prompt=f"""You are a Lifestyle and Behavioral Risk Specialist for NYL Insurance with expertise in behavioral pattern analysis, lifestyle risk assessment, and psychosocial factor evaluation.
+        system_prompt=f"""You are a Lifestyle and Behavioral Risk Specialist for Trianz Insurance with expertise in behavioral pattern analysis, lifestyle risk assessment, and psychosocial factor evaluation.
 
 LIFESTYLE RISK ASSESSMENT PARAMETERS:
 Lifestyle Risk Factors: {LIFESTYLE_RISK_FACTORS}
@@ -652,7 +651,7 @@ Your behavioral analysis provides critical insights into lifestyle-related morta
 
     summary_generation_agent = Agent(
         model=nova_pro,
-        system_prompt=f"""You are the Chief Underwriting Officer for NYL Insurance responsible for generating comprehensive underwriting summaries in professional TABLE-BASED HTML format for executive review and decision-making, format for generating the summary will be same you will follow a standard procedure and format of generating the summary so everytime you generate the summary format and structure must be same only make sure there is no markdown ```html don't write ```html markdown.
+        system_prompt=f"""You are the Chief Underwriting Officer for Trianz Insurance responsible for generating comprehensive underwriting summaries in professional TABLE-BASED HTML format for executive review and decision-making, format for generating the summary will be same you will follow a standard procedure and format of generating the summary so everytime you generate the summary format and structure must be same only make sure there is no markdown ```html don't write ```html markdown.
 
 UNDERWRITING DECISION FRAMEWORK:
 Risk Categories: {UNDERWRITING_GUIDELINES['risk_categories']}
@@ -746,7 +745,7 @@ def data_intake_tool(session_data: str) -> str:
         if data_intake_agent is None:
             intake_analysis = "Error: Data intake agent not available due to AWS credential issues. Please check your AWS configuration."
         else:
-            intake_prompt = f"""Please conduct comprehensive document intake and initial processing for this NYL Insurance underwriting case:
+            intake_prompt = f"""Please conduct comprehensive document intake and initial processing for this Insurance underwriting case:
 
 DOCUMENT INVENTORY:
 Total Documents Submitted: {document_analysis["total_documents"]}
@@ -809,7 +808,7 @@ def document_verification_tool(session_data: str) -> str:
         if document_verification_agent is None:
             verification_analysis = "Error: Document verification agent not available due to AWS credential issues. Please check your AWS configuration."
         else:
-            verification_prompt = f"""Please conduct thorough document verification for this NYL Insurance underwriting submission:
+            verification_prompt = f"""Please conduct thorough document verification for this Insurance underwriting submission:
 
 INITIAL DATA INTAKE RESULTS:
 {intake_results}
@@ -818,7 +817,7 @@ COMPLETE DOCUMENT CONTENT FOR VERIFICATION:
 {context.document_content}
 
 Please provide comprehensive document verification analysis focusing on:
-- Document completeness verification against NYL requirements
+- Document completeness verification against  requirements
 - Authentication assessment and fraud indicator detection
 - Regulatory compliance verification (signatures, disclosures, witness requirements)
 - Missing documentation identification with specific requirements
@@ -871,7 +870,7 @@ def medical_risk_assessment_tool(session_data: str) -> str:
         if medical_risk_assessment_agent is None:
             medical_analysis = "Error: Medical risk assessment agent not available due to AWS credential issues. Please check your AWS configuration."
         else:
-            medical_prompt = f"""Please conduct comprehensive medical risk assessment for this NYL Insurance underwriting case:
+            medical_prompt = f"""Please conduct comprehensive medical risk assessment for this  Insurance underwriting case:
 
 PREVIOUS ANALYSIS CONTEXT:
 Data Intake Results: {previous_results['data_intake']}
@@ -935,7 +934,7 @@ def financial_analysis_tool(session_data: str) -> str:
         if financial_agent is None:
             financial_analysis = "Error: Financial analysis agent not available due to AWS credential issues. Please check your AWS configuration."
         else:
-            financial_prompt = f"""Please conduct comprehensive financial analysis for this NYL Insurance underwriting case:
+            financial_prompt = f"""Please conduct comprehensive financial analysis for this Insurance underwriting case:
 
 PREVIOUS ANALYSIS CONTEXT:
 Data Intake Results: {previous_results['data_intake']}
@@ -1001,7 +1000,7 @@ def driving_analysis_tool(session_data: str) -> str:
         if driving_agent is None:
             driving_analysis = "Error: Driving analysis agent not available due to AWS credential issues. Please check your AWS configuration."
         else:
-            driving_prompt = f"""Please conduct comprehensive driving record analysis for this NYL Insurance underwriting case:
+            driving_prompt = f"""Please conduct comprehensive driving record analysis for this Insurance underwriting case:
 
 PREVIOUS ANALYSIS CONTEXT:
 Data Intake Results: {previous_results['data_intake']}
@@ -1069,7 +1068,7 @@ def compliance_analysis_tool(session_data: str) -> str:
         if compliance_agent is None:
             compliance_analysis = "Error: Compliance analysis agent not available due to AWS credential issues. Please check your AWS configuration."
         else:
-            compliance_prompt = f"""Please conduct comprehensive regulatory compliance verification for this NYL Insurance underwriting case:
+            compliance_prompt = f"""Please conduct comprehensive regulatory compliance verification for this Insurance underwriting case:
 
 ALL PREVIOUS SPECIALIST ANALYSIS:
 {json.dumps(all_previous_results, indent=2)}
@@ -1135,7 +1134,7 @@ def lifestyle_behavioral_analysis_tool(session_data: str) -> str:
         if lifestyle_behavioral_agent is None:
             lifestyle_analysis = "Error: Lifestyle behavioral analysis agent not available due to AWS credential issues. Please check your AWS configuration."
         else:
-            lifestyle_prompt = f"""Please conduct comprehensive lifestyle and behavioral risk analysis for this NYL Insurance underwriting case:
+            lifestyle_prompt = f"""Please conduct comprehensive lifestyle and behavioral risk analysis for this Insurance underwriting case:
 
 ALL PREVIOUS SPECIALIST ANALYSIS:
 {json.dumps(all_previous_results, indent=2)}
@@ -1233,7 +1232,7 @@ def summary_generation_tool(session_data: str) -> str:
         if summary_generation_agent is None:
             # Generate fallback summary when agent is not available
             comprehensive_summary = f"""<div class="underwriting-summary">
-<h1>NYL Insurance Underwriting Summary</h1>
+<h1>Trianz Insurance Underwriting & Policy Generation </h1>
 
 <div class="session-info">
 <h2>Session Information</h2>
@@ -1360,7 +1359,7 @@ class UnderwritingOrchestrator:
                     lifestyle_behavioral_analysis_tool,
                     summary_generation_tool
                 ],
-                system_prompt=f"""You are the Chief Underwriting Orchestrator for NYL Insurance responsible for coordinating comprehensive underwriting analysis using 8 specialized Nova Pro AI agents.
+                system_prompt=f"""You are the Chief Underwriting Orchestrator for Insurance responsible for coordinating comprehensive underwriting analysis using 8 specialized Nova Pro AI agents.
 
 MANDATORY EXECUTION SEQUENCE:
 You MUST execute ALL 8 agents in this exact order, regardless of any warnings, errors, or issues found in the end when summary agent generates the the summary in that all warnings and error will be highlighted seprately :
@@ -1395,7 +1394,7 @@ Risk Categories: {list(UNDERWRITING_GUIDELINES['risk_categories'].keys())}
 
 Execute the complete 8-agent underwriting workflow and return the comprehensive HTML summary with all findings consolidated."""
             )
-            print("[INFO] NYL Underwriting Orchestrator initialized successfully with 8 specialized agents")
+            print("[INFO]  Underwriting Orchestrator initialized successfully with 8 specialized agents")
             
         except Exception as e:
             print(f"[ERROR] Failed to create orchestrator: {e}")
@@ -1408,7 +1407,7 @@ Execute the complete 8-agent underwriting workflow and return the comprehensive 
             is_valid, _ = validate_aws_credentials()
             if not is_valid:
                 return f"""<div class="underwriting-summary">
-<h1>NYL Insurance Underwriting Summary - Credential Error</h1>
+<h1>Insurance Underwriting Summary - Credential Error</h1>
 <div class="error-info">
 <h2>Error Information</h2>
 <p><strong>Session ID:</strong> {session_id}</p>
@@ -1487,7 +1486,7 @@ Execute the complete 8-agent underwriting workflow and return the comprehensive 
             all_insights = context.get_all_insights()
             
             fallback_summary = f"""<div class="underwriting-summary">
-<h1>NYL Insurance Underwriting Summary</h1>
+<h1>Trianz Insurance Underwriting Summary</h1>
 
 <div class="session-info">
 <h2>Session Information</h2>
@@ -1512,7 +1511,7 @@ Execute the complete 8-agent underwriting workflow and return the comprehensive 
 
 <div class="processing-note">
 <h2>Processing Status</h2>
-<p>This summary represents partial underwriting analysis. Some specialist components may require manual review or additional processing. Please contact NYL underwriting support for complete analysis if needed.</p>
+<p>This summary represents partial underwriting analysis. Some specialist components may require manual review or additional processing. Please contact Trianz underwriting support for complete analysis if needed.</p>
 </div>
 </div>"""
             
@@ -1521,7 +1520,7 @@ Execute the complete 8-agent underwriting workflow and return the comprehensive 
         except Exception as e:
             print(f"[ERROR] Manual processing error: {e}")
             return f"""<div class="underwriting-summary">
-<h1>NYL Insurance Underwriting Summary - Processing Error</h1>
+<h1>Insurance Underwriting Summary - Processing Error</h1>
 <div class="error-info">
 <h2>Error Information</h2>
 <p><strong>Session ID:</strong> {session_id}</p>
@@ -1530,19 +1529,19 @@ Execute the complete 8-agent underwriting workflow and return the comprehensive 
 </div>
 <div class="next-steps">
 <h2>Next Steps</h2>
-<p>Please contact NYL underwriting support for manual review and processing assistance.</p>
+<p>Please contact underwriting support for manual review and processing assistance.</p>
 </div>
 </div>"""
 
 # Initialize the orchestrator
 underwriting_orchestrator = UnderwritingOrchestrator()
 
-# Additional utility functions for debugging and monitoring
+
 
 def check_system_status():
     """Check overall system status and configuration"""
     print("\n" + "="*60)
-    print("NYL UNDERWRITING SYSTEM STATUS CHECK")
+    print("UNDERWRITING SYSTEM STATUS CHECK")
     print("="*60)
     
     # Check AWS credentials
@@ -1569,10 +1568,10 @@ def check_system_status():
         status = "Ã¢Å“â€œ Ready" if agent else "Ã¢Å“â€” Not Available"
         print(f"  {agent_name}: {status}")
     
-    # Check orchestrator
+    
     print(f"\nOrchestrator: {'Ã¢Å“â€œ Ready' if underwriting_orchestrator.orchestrator else 'Ã¢Å“â€” Not Available'}")
     
-    # Check upload folder
+
     print(f"Upload Folder: {'Ã¢Å“â€œ Exists' if os.path.exists(UPLOAD_FOLDER) else 'Ã¢Å“â€” Missing'} ({UPLOAD_FOLDER})")
     
     print("="*60)
@@ -1608,13 +1607,12 @@ def cleanup_old_sessions(max_age_hours=24):
                     del context_registry[session_id]
                     cleaned_sessions.append(session_id)
         
-        # Also clean up file system
+        
         if os.path.exists(UPLOAD_FOLDER):
             for session_folder in os.listdir(UPLOAD_FOLDER):
                 session_path = os.path.join(UPLOAD_FOLDER, session_folder)
                 if os.path.isdir(session_path):
                     try:
-                        # Check modification time
                         mod_time = datetime.fromtimestamp(os.path.getmtime(session_path))
                         age = current_time - mod_time
                         if age.total_seconds() > (max_age_hours * 3600):
@@ -1632,7 +1630,7 @@ def cleanup_old_sessions(max_age_hours=24):
         print(f"[ERROR] Session cleanup failed: {e}")
         return []
 
-# Export main functions for use by other modules
+
 __all__ = [
     'UnderwritingOrchestrator',
     'underwriting_orchestrator', 
@@ -1646,17 +1644,17 @@ __all__ = [
     'validate_aws_credentials'
 ]
 
-# Run system status check on import
+
 if __name__ == "__main__":
     check_system_status()
-    print("[INFO] NYL Underwriting System loaded and ready")
+    print("[INFO] Underwriting System loaded and ready")
     print("[INFO] Key functions available:")
     print("  - underwriting_orchestrator.process_underwriting(input, session_id)")
     print("  - check_system_status()")
     print("  - get_session_status(session_id)")
     print("  - cleanup_old_sessions()")
     
-    # Test credentials
+  
     print(f"\n[TEST] Current AWS Region: {os.getenv('AWS_REGION', 'Not set')}")
     print(f"[TEST] Access Key ID: {os.getenv('AWS_ACCESS_KEY_ID', 'Not set')[:8]}..." if os.getenv('AWS_ACCESS_KEY_ID') else "[TEST] Access Key ID: Not set")
     print(f"[TEST] Session Token: {'Available' if os.getenv('AWS_SESSION_TOKEN') else 'Not Available'}")

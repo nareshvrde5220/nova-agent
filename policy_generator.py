@@ -21,7 +21,7 @@ model_id = "amazon.nova-pro-v1:0"
 s3_client = boto3.client('s3', region_name=aws_region)
 bedrock_client = boto3.client('bedrock-runtime', region_name=aws_region)
 
-S3_BUCKET = 'nyl-underwriting-documents-121409194654'
+S3_BUCKET = 'trianz-aws-hackathon'
 
 
 def extract_policy_data_from_summary(final_summary: str) -> dict:

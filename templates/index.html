@@ -22,6 +22,8 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
       rel="stylesheet"
     />
+    <!-- html2pdf library for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
       :root {
@@ -47,7 +49,6 @@
       }
 
       body {
-        /* background: linear-gradient(89.88deg, rgba(219, 5, 231, 0.8) 0.11%, rgba(53, 69, 217, 0.8) 45.01%, rgba(14, 139, 217, 0.8) 99.89%), url('/static/images/bg.jpeg'); */
         background: url("{{ url_for('static', filename='images/bg.jpeg') }}");
         background-size: cover;
         background-position: center;
@@ -178,6 +179,8 @@
         border-radius: 20px;
         margin: 2% 0;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
       }
 
       .chat-head {
@@ -341,41 +344,12 @@
       @keyframes slideInUp {
         from {
           opacity: 0;
-          transform: translateY(30px);
+          transform: translateY(20px);
         }
         to {
           opacity: 1;
           transform: translateY(0);
         }
-      }
-
-      @keyframes pulse {
-        0% {
-          transform: scale(1);
-        }
-        50% {
-          transform: scale(1.05);
-        }
-        100% {
-          transform: scale(1);
-        }
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-
-      .step-completed {
-        animation: pulse 0.6s ease-in-out;
-      }
-
-      .step-in-progress {
-        animation: pulse 1.5s infinite;
       }
 
       .accordion-button {
@@ -680,18 +654,18 @@
     <div class="main-container">
       <div class="chat-container">
         <div class="chat-header">
-            <div class="row">
-           <div class="col-3">
-          <img
-            src="{{ url_for('static', filename='images/d-ai-logo-inverse.svg') }}"
-            class="img-fluid"
-            alt="Chat Head"
-          />
-          </div>
-          <div class="col">
-          <h1>Health Insurance Agent</h1>
-          <p>Your Assurance for a Healthy Life</p>
-          </div>
+          <div class="row">
+            <div class="col-3">
+              <img
+                src="{{ url_for('static', filename='images/d-ai-logo-inverse.svg') }}"
+                class="img-fluid"
+                alt="Chat Head"
+              />
+            </div>
+            <div class="col">
+              <h1>Health Insurance Agent</h1>
+              <p>Your Assurance for a Healthy Life</p>
+            </div>
           </div>
         </div>
 
@@ -779,7 +753,7 @@
             style="background: var(--primary-gradient); color: white"
           >
             <h5 class="modal-title" id="processingModalLabel">
-              <i class="bi bi-gear-fill me-2"></i>Document Processing Status
+              Document Processing Status
             </h5>
             <button
               type="button"
@@ -805,7 +779,7 @@
               id="viewSummaryBtn"
               style="display: none"
             >
-              <i class="bi bi-eye me-1"></i> View Summary
+              View Summary
             </button>
             <button
               type="button"
@@ -813,7 +787,7 @@
               id="getPolicyBtn"
               style="display: none"
             >
-              <i class="bi bi-file-earmark-text me-1"></i> Get Policy
+              Get Policy
             </button>
           </div>
         </div>
@@ -835,7 +809,7 @@
             style="background: var(--primary-gradient); color: white"
           >
             <h5 class="modal-title" id="summaryModalLabel">
-              <i class="bi bi-file-text me-2"></i>Underwriting Summary Report
+              Underwriting Summary Report
             </h5>
             <button
               type="button"
@@ -846,9 +820,7 @@
           </div>
           <div class="modal-body" id="summaryModalBody">
             <div class="text-center text-muted">
-              <div class="spinner-border text-primary mb-3" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
+              <div class="spinner-border text-primary mb-3" role="status"></div>
               <p>Loading summary report...</p>
             </div>
           </div>
@@ -861,14 +833,14 @@
               Close
             </button>
             <button type="button" class="btn btn-primary" id="printSummaryBtn">
-              <i class="bi bi-printer me-1"></i>Print Summary
+              Print Summary
             </button>
             <button
               type="button"
               class="btn btn-success"
               id="downloadSummaryBtn"
             >
-              <i class="bi bi-download me-1"></i>Download PDF
+              Download PDF
             </button>
           </div>
         </div>
@@ -947,14 +919,11 @@
           currentSessionId
         );
 
-        console.log(
-          "[INFO] Ending Nova Sonic session as upload panel is opening"
-        );
         if (isSessionActive) {
           socket.emit("end_nova_session");
           resetUI();
           appendReplyMessage(
-            "✅ Voice conversation ended. Please upload your documents to continue."
+            "Voice conversation ended. Please upload your documents to continue."
           );
         }
 
@@ -964,20 +933,15 @@
         const uploadArea = document.createElement("div");
         uploadArea.className = "upload-area";
         uploadArea.innerHTML = `
-                <i class="bi bi-cloud-upload fs-1 text-primary mb-3"></i>
-                <h5>Upload Your Documents</h5>
+                Upload Your Documents
                 <p class="text-muted">Please upload your documents as a ZIP file</p>
                 <input type="file" id="fileUploadInput" accept=".zip" style="display: none;">
                 <button class="btn upload-btn" onclick="document.getElementById('fileUploadInput').click()">
-                    <i class="bi bi-upload me-2"></i>Choose ZIP File
+                    Choose ZIP File
                 </button>
             `;
 
         canvasBody.appendChild(uploadArea);
-
-        // Control buttons will be added later when modals are invoked
-
-        // Control buttons will be added when modals are invoked
 
         const fileInput = document.getElementById("fileUploadInput");
         fileInput.onchange = async () => {
@@ -1016,8 +980,6 @@
 
           fileInput.value = "";
         };
-
-        // Modal will be shown when steps are actually processed
       });
 
       socket.on("policy_generated", function (data) {
@@ -1026,8 +988,7 @@
         const policyDiv = document.createElement("div");
         policyDiv.className = "alert alert-success mt-3 text-center";
         policyDiv.innerHTML = `
-                <i class="bi bi-file-earmark-word-fill text-success me-2 fs-4"></i>
-                <strong>Health Insurance Policy Generated</strong><br>
+                Policy Generated Successfully<br>
                 <small>Policy Number: ${data.policy_number}</small><br>
                 <small class="text-muted">Click "Get Policy" button to download and view</small>
             `;
@@ -1038,7 +999,7 @@
 
         appendReplyMessage(`
                 <div class="policy-download-box p-3 border rounded mt-2" style="background-color: #f0f8ff;">
-                    <h6 class="text-success"><i class="bi bi-check-circle-fill"></i> Policy Generated Successfully!</h6>
+                    <h6 class="text-success">Policy Generated Successfully!</h6>
                     <p class="mb-2"><strong>Policy Number:</strong> ${data.policy_number}</p>
                     <p class="mb-0"><small class="text-muted">Click the "Get Policy" button in the side panel to download and view your policy.</small></p>
                 </div>
@@ -1053,17 +1014,13 @@
         const $canvasBody = $(".process-div");
         $canvasBody.html(`
                 <div id="loadingVideoWrapper" class="text-center">
-                    <div class="spinner-border text-primary mb-3" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
                     <p class="text-center">Processing your documents...</p>
                 </div>
             `);
 
-        // Add control buttons when process-div is shown
         addControlButtons();
 
-        // Modal will be shown when steps are actually processed
         function checkStatusFile() {
           const url = `/status/${sessionId}`;
           console.log(`[INFO] Checking agent status (attempt ${attempts + 1})`);
@@ -1132,7 +1089,6 @@
                       message: "analysis completed successfully",
                     });
 
-                    // Show action buttons in processing modal
                     document.getElementById("viewSummaryBtn").style.display =
                       "inline-block";
                     document.getElementById("getPolicyBtn").style.display =
@@ -1140,15 +1096,7 @@
 
                     if (final_summary) {
                       appendReplyMessage(
-                        "✅ <strong>Underwriting analysis completed!</strong><br><small>Click 'View Summary' button to see the full report.</small>"
-                      );
-
-                      const $chatList = $(".chat-list");
-                      $chatList.animate(
-                        {
-                          scrollTop: $chatList.prop("scrollHeight"),
-                        },
-                        1000
+                        "<strong>Underwriting analysis completed!</strong><br><small>Click 'View Summary' button to see the full report.</small>"
                       );
                     }
                   }, 1000);
@@ -1228,7 +1176,6 @@
       }
 
       function addControlButtons() {
-        // Check if control buttons already exist
         if (document.querySelector(".control-buttons")) {
           return;
         }
@@ -1236,21 +1183,19 @@
         const canvasBody = document.querySelector(".upload-div");
         if (!canvasBody) return;
 
-        // Add control buttons under upload area
         const controlButtons = document.createElement("div");
         controlButtons.className =
           "control-buttons mt-3 d-flex flex-wrap gap-2 justify-content-center";
         controlButtons.innerHTML = `
                 <button class="btn btn-outline-primary btn-sm" id="openProcessingModalBtn">
-                    <i class="bi bi-gear-fill me-1"></i>Processing Steps
+                    Processing Steps
                 </button>
                 <button class="btn btn-outline-success btn-sm" id="openSummaryModalBtn">
-                    <i class="bi bi-file-text me-1"></i>Summary Report
+                    Summary Report
                 </button>
             `;
         canvasBody.appendChild(controlButtons);
 
-        // Add event listeners for the buttons
         document
           .getElementById("openProcessingModalBtn")
           .addEventListener("click", function () {
@@ -1271,13 +1216,11 @@
       }
 
       function initializeStepsAccordion(stepData) {
-        // Show processing modal when steps are being processed
         const processingModal = new bootstrap.Modal(
           document.getElementById("processingModal")
         );
         processingModal.show();
 
-        // Add control buttons after modal is invoked
         addControlButtons();
 
         let container = document.getElementById("stepsDiv");
@@ -1295,32 +1238,24 @@
         stepData.forEach((item, index) => {
           const stepId = `step${index}`;
           const collapseId = `collapse${index}`;
-          const isFirst = index === 0;
 
           container.innerHTML += `
-                    <div class="accordion-item processing-step">
+                    <div class="accordion-item">
                         <h2 class="accordion-header d-flex justify-content-between align-items-center" id="${stepId}">
-                            <button class="accordion-button" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="true" aria-controls="${collapseId}">
+                            <button class="accordion-button collapsed" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
                                 <span class="me-2 icon-wrapper">
-                                    <i id="tick-${index}" class="bi bi-gear-fill text-primary fs-4"></i>
+                                    <div id="loader-${index}" class="spinner-border spinner-border-sm text-primary" role="status"></div>
                                 </span>
                                 <span id="step-label-${index}">${item.step}</span>
-                                <span class="badge bg-primary ms-2"></span>
                             </button>
                         </h2>
-                        <div id="${collapseId}" class="accordion-collapse collapse show"
-                            aria-labelledby="${stepId}" data-bs-parent="#stepAccordion">
+                        <div id="${collapseId}" class="accordion-collapse collapse"
+                            aria-labelledby="${stepId}" data-bs-parent="#stepsDiv">
                             <div class="accordion-body" id="desc-${index}">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                    <span class="text-muted">${item.description}</span>
-                                </div>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                         role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="text-muted">${item.description}</div>
+                                <div class="progress mt-3" style="height: 6px;">
+                                    <div class="progress-bar bg-secondary" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                             </div>
                         </div>
@@ -1330,22 +1265,17 @@
       }
 
       function hasStepStatusChanged(step, index) {
-        const currentIcon = document.getElementById(`tick-${index}`);
+        const currentIcon = document.getElementById(`loader-${index}`) || document.getElementById(`tick-${index}`);
         if (!currentIcon) return true;
 
         const currentStatus = step.status;
-        const hasWarningClass = currentIcon.classList.contains("text-warning");
         const hasSuccessClass = currentIcon.classList.contains("text-success");
-        const hasDangerClass = currentIcon.classList.contains("text-danger");
 
-        if (currentStatus === "in_progress" && !hasWarningClass) return true;
-        if (currentStatus === "completed" && !hasSuccessClass) return true;
-        if (currentStatus === "failed" && !hasDangerClass) return true;
-
-        return false;
+        return currentStatus === "completed" && !hasSuccessClass;
       }
 
       function updateStepUI(step, index) {
+        const loader = document.getElementById(`loader-${index}`);
         const tick = document.getElementById(`tick-${index}`);
         const label = document.getElementById(`step-label-${index}`);
         const desc = document.getElementById(`desc-${index}`);
@@ -1357,158 +1287,42 @@
           `#collapse${index} .progress-bar`
         );
 
-        if (!tick || !label || !desc) return;
+        if (!label || !desc) return;
 
-        // Update progress bar
-        if (progressBar) {
-          if (step.status === "completed") {
-            progressBar.style.width = "100%";
-            progressBar.classList.remove("progress-bar-animated");
-          } else if (
-            step.status === "in_progress" ||
-            step.status === "running"
-          ) {
-            progressBar.style.width = "50%";
-          }
-        }
-
-        if (step.status === "in_progress" || step.status === "running") {
-          tick.className = "bi bi-arrow-repeat text-warning fs-4";
-          label.innerHTML = `${step.step} <span class="spinner-border spinner-border-sm text-warning ms-2" role="status"></span>`;
-
-          // Add animation class
-          if (accordionItem) {
-            accordionItem.classList.add("step-in-progress");
+        if (step.status === "completed") {
+          // Replace spinner with check-circle
+          if (loader) {
+            const check = document.createElement("i");
+            check.id = `tick-${index}`;
+            check.className = "bi bi-check-circle text-success fs-4";
+            loader.parentNode.replaceChild(check, loader);
           }
 
-          if (collapseElement) {
-            const collapse = new bootstrap.Collapse(collapseElement, {
-              show: true,
-            });
-          }
-
-          // Close all previous completed steps
-          for (let i = 0; i < index; i++) {
-            const prevCollapse = document.getElementById(`collapse${i}`);
-            if (prevCollapse) {
-              const prevCollapseInstance =
-                bootstrap.Collapse.getInstance(prevCollapse);
-              if (prevCollapseInstance) {
-                prevCollapseInstance.hide();
-              }
-            }
-          }
-        } else if (step.status === "completed") {
-          tick.className = "bi bi-check-circle text-success fs-4";
           label.innerHTML = `${step.step} <span class="badge bg-success ms-2">Completed</span>`;
 
-          // Add completion animation
           if (accordionItem) {
-            accordionItem.classList.remove("processing-step");
             accordionItem.classList.add("step-completed");
           }
 
-          // Collapse completed stages
           if (collapseElement) {
             const collapseInstance =
               bootstrap.Collapse.getInstance(collapseElement);
             if (collapseInstance) {
               collapseInstance.hide();
-            } else {
-              // If no instance exists, create one and hide it
-              const collapse = new bootstrap.Collapse(collapseElement, {
-                show: false,
-              });
             }
           }
 
-          // Update progress bar to 100%
           if (progressBar) {
             progressBar.style.width = "100%";
-            progressBar.classList.remove("progress-bar-animated");
+            progressBar.classList.remove("bg-secondary");
             progressBar.classList.add("bg-success");
           }
 
           if (step.result_summary) {
             desc.innerHTML = `
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="spinner-border spinner-border-sm text-success me-2" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <span class="text-muted">${step.description}</span>
-                        </div>
-                        <div class="progress mb-3" style="height: 6px;">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
                         <div class="text-success"><small><strong>Completed:</strong> ${step.result_summary}</small></div>
                     `;
-          } else {
-            desc.innerHTML = `
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="spinner-border spinner-border-sm text-success me-2" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <span class="text-muted">${step.description}</span>
-                        </div>
-                        <div class="progress" style="height: 6px;">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    `;
           }
-        } else if (step.status === "failed") {
-          tick.className = "bi bi-x-circle text-danger fs-4";
-          label.innerHTML = `${step.step} <span class="badge bg-danger ms-2">Failed</span>`;
-
-          // Add error animation
-          if (accordionItem) {
-            accordionItem.classList.remove("processing-step");
-            accordionItem.classList.add("step-failed");
-          }
-
-          // Keep failed stages open to show error details
-          if (collapseElement) {
-            const collapse = new bootstrap.Collapse(collapseElement, {
-              show: true,
-            });
-          }
-
-          // Update progress bar to show error
-          if (progressBar) {
-            progressBar.style.width = "100%";
-            progressBar.classList.remove("progress-bar-animated");
-            progressBar.classList.add("bg-danger");
-          }
-
-          if (step.result_summary) {
-            desc.innerHTML = `
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="spinner-border spinner-border-sm text-danger me-2" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <span class="text-muted">${step.description}</span>
-                        </div>
-                        <div class="progress mb-3" style="height: 6px;">
-                            <div class="progress-bar bg-danger" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                        <div class="text-danger"><small><strong>Error:</strong> ${step.result_summary}</small></div>
-                    `;
-          } else {
-            desc.innerHTML = `
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="spinner-border spinner-border-sm text-danger me-2" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <span class="text-muted">${step.description}</span>
-                        </div>
-                        <div class="progress" style="height: 6px;">
-                            <div class="progress-bar bg-danger" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    `;
-          }
-        } else {
-          tick.className = "bi bi-check-circle text-secondary fs-4";
-          label.textContent = step.step;
-          desc.innerHTML = step.description;
         }
       }
 
@@ -1521,8 +1335,7 @@
         if (finalResult.status === "COMPLETED") {
           summaryDiv.classList.add("alert-success");
           summaryDiv.innerHTML =
-            '<i class="bi bi-check-circle-fill text-success me-2 fs-4"></i> ' +
-            "UNDERWRITING ANALYSIS COMPLETED";
+            'UNDERWRITING ANALYSIS COMPLETED';
 
           const policyNote = document.createElement("p");
           policyNote.className = "mt-2 mb-0";
@@ -1532,7 +1345,6 @@
         } else {
           summaryDiv.classList.add("alert-info");
           summaryDiv.innerHTML =
-            '<i class="bi bi-info-circle-fill text-info me-2 fs-4"></i> ' +
             finalResult.status;
         }
 
@@ -1679,7 +1491,6 @@
         }
       });
 
-      // View Summary Button Handler
       document
         .getElementById("viewSummaryBtn")
         .addEventListener("click", function () {
@@ -1690,7 +1501,6 @@
             return;
           }
 
-          // Enhanced summary display with better formatting
           const formattedSummary = formatSummaryReport(final_summary);
           document.getElementById("summaryModalBody").innerHTML =
             formattedSummary;
@@ -1704,7 +1514,7 @@
         return `
                 <div class="summary-report">
                     <div class="summary-header">
-                        <h4><i class="bi bi-file-text me-2"></i>Underwriting Analysis Report</h4>
+                        <h4>Underwriting Analysis Report</h4>
                         <p class="mb-0">Comprehensive Health Insurance Assessment</p>
                     </div>
                     
@@ -1718,20 +1528,20 @@
                             <div class="metric-label">Completion Rate</div>
                         </div>
                         <div class="metric-card">
-                            <div class="metric-value">✓</div>
+                            <div class="metric-value">Check</div>
                             <div class="metric-label">Policy Generated</div>
                         </div>
                     </div>
                     
                     <div class="summary-section">
-                        <h5><i class="bi bi-clipboard-data me-2"></i>Analysis Results</h5>
+                        <h5>Analysis Results</h5>
                         <div class="summary-content">
                             ${summary}
                         </div>
                     </div>
                     
                     <div class="summary-section">
-                        <h5><i class="bi bi-check-circle me-2"></i>Processing Status</h5>
+                        <h5>Processing Status</h5>
                         <div class="d-flex flex-wrap gap-2">
                             <span class="status-badge status-completed">Data Intake</span>
                             <span class="status-badge status-completed">Document Verification</span>
@@ -1747,27 +1557,52 @@
             `;
       }
 
-      // Print Summary Button Handler
       document
         .getElementById("printSummaryBtn")
         .addEventListener("click", function () {
-          const printContent =
-            document.getElementById("summaryModalBody").innerHTML;
-          const printWindow = window.open("", "", "height=600,width=800");
-          printWindow.document.write(
-            "<html><head><title>Underwriting Summary Report</title>"
-          );
-          printWindow.document.write(
-            '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">'
-          );
-          printWindow.document.write(
-            "<style>body { padding: 20px; } table { margin-bottom: 20px; }</style>"
-          );
-          printWindow.document.write("</head><body>");
-          printWindow.document.write(printContent);
-          printWindow.document.write("</body></html>");
-          printWindow.document.close();
-          printWindow.print();
+          const summaryContent = document.getElementById("summaryModalBody");
+          
+          const opt = {
+            margin: 0.5,
+            filename: `summary_report_${currentSessionId || 'report'}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+          };
+          
+          html2pdf().set(opt).from(summaryContent).save();
+          
+          setTimeout(() => {
+            appendReplyMessage(`
+              <div class="alert alert-success mt-2">
+                Summary PDF downloaded successfully!
+              </div>
+            `);
+          }, 500);
+        });
+        // Download PDF button - same as Print Summary
+      document
+        .getElementById("downloadSummaryBtn")
+        .addEventListener("click", function () {
+          const summaryContent = document.getElementById("summaryModalBody");
+          
+          const opt = {
+            margin: 0.5,
+            filename: `summary_report_${currentSessionId || 'report'}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+          };
+          
+          html2pdf().set(opt).from(summaryContent).save();
+          
+          setTimeout(() => {
+            appendReplyMessage(`
+              <div class="alert alert-success mt-2">
+                Summary PDF downloaded successfully!
+              </div>
+            `);
+          }, 500);
         });
 
       document
@@ -1783,50 +1618,20 @@
             return;
           }
 
-          fetch(`/policy_status/${currentSessionId}`)
-            .then((response) => {
-              console.log("[DEBUG] Policy status response:", response.status);
-              return response.json();
-            })
-            .then((data) => {
-              console.log("[DEBUG] Policy status data:", data);
-              if (data.status === "success" && data.policy_generated) {
-                const downloadUrl = `/download_policy/${currentSessionId}`;
-
-                const downloadLink = document.createElement("a");
-                downloadLink.href = downloadUrl;
-                downloadLink.download = `policy_${currentSessionId}.pdf`;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-
-                window.open(`/view_policy/${currentSessionId}`, "_blank");
-
-                appendReplyMessage(`
-                            <div class="alert alert-success mt-2">
-                                <i class="bi bi-download me-1"></i>
-                                Policy downloaded and opened in a new tab!
-                            </div>
-                        `);
-              } else {
-                alert(
-                  "Policy document is not yet available. Please wait for processing to complete."
-                );
-              }
-            })
-            .catch((error) => {
-              console.error("[ERROR] Error checking policy status:", error);
-              appendReplyMessage(`
-                        <div class="alert alert-danger mt-2">
-                            <i class="bi bi-exclamation-triangle me-1"></i>
-                            Error: ${error.message}. Check console for details.
-                        </div>
-                    `);
-            });
+          // Direct download - policy exists in S3
+          console.log("[DEBUG] Starting policy download...");
+          window.location.href = `/download_policy/${currentSessionId}`;
+          
+          appendReplyMessage(`
+            <div class="alert alert-success mt-2">
+              Policy download started! Check your downloads folder.
+            </div>
+          `);
         });
 
       function appendUserMessage(message) {
         const chatContainer = document.getElementById("chatMessages");
+        const chatList = document.querySelector(".chat-list");
 
         const li = document.createElement("li");
         li.className = "chat-message user";
@@ -1845,14 +1650,12 @@
         li.appendChild(avatar);
         chatContainer.appendChild(li);
 
-        // Auto-scroll to bottom with a small delay to ensure DOM is updated
-        setTimeout(() => {
-          chatContainer.scrollTop = chatContainer.scrollHeight;
-        }, 100);
+        chatList.scrollTop = chatList.scrollHeight;
       }
 
       function appendReplyMessage(reply) {
         const chatContainer = document.getElementById("chatMessages");
+        const chatList = document.querySelector(".chat-list");
 
         const li = document.createElement("li");
         li.className = "chat-message";
@@ -1871,10 +1674,7 @@
         li.appendChild(card);
         chatContainer.appendChild(li);
 
-        // Auto-scroll to bottom with a small delay to ensure DOM is updated
-        setTimeout(() => {
-          chatContainer.scrollTop = chatContainer.scrollHeight;
-        }, 100);
+        chatList.scrollTop = chatList.scrollHeight;
       }
     </script>
   </body>

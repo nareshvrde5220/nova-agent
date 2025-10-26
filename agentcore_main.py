@@ -11,17 +11,17 @@ import boto3
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
 from bedrock_agentcore.memory import MemoryClient
 
-# Configure logging
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-# Initialize AgentCore app
+
 app = BedrockAgentCoreApp()
 
-# Initialize AgentCore Memory Client
+
 try:
     memory_client = MemoryClient()
     logger.info("AgentCore Memory Client initialized successfully")
@@ -51,25 +51,24 @@ except ImportError as e:
     underwriting_orchestrator = None
     document_processor = None
 
-class NYLUnderwritingAgent:
-    """Enhanced AgentCore-compatible NYL Underwriting Agent with hybrid local-cloud support"""
+class UnderwritingAgent:
+    """Enhanced AgentCore-compatible Underwriting Agent with hybrid local-cloud support"""
     
     def __init__(self):
         self.s3_client = None
-        self.s3_bucket = 'nyl-underwriting-documents-121409194654'
+        self.s3_bucket = 'trianz-aws-hackathon'
         self.setup_aws_services()
         self.validate_system()
     
     def setup_aws_services(self):
         """Initialize AWS services with enhanced error handling"""
         try:
-        # Get AWS region from environment or use default
+        
             region = os.environ.get('AWS_REGION') or os.environ.get('AWS_DEFAULT_REGION') or 'us-east-1'
         
             self.s3_client = boto3.client('s3', region_name=region)
             logger.info(f"AWS S3 client initialized successfully with region: {region}")
-            
-            # Test S3 bucket access
+           
             self.s3_client.head_bucket(Bucket=self.s3_bucket)
             logger.info(f"S3 bucket access confirmed: {self.s3_bucket}")
             
@@ -84,13 +83,13 @@ class NYLUnderwritingAgent:
                 logger.error("Underwriting orchestrator not available")
                 return False
                 
-            # Check AWS credentials
+          
             is_valid, _ = validate_aws_credentials()
             if not is_valid:
                 logger.error("AWS credentials validation failed")
                 return False
             
-            # Check S3 bucket access
+            
             if not self.s3_client:
                 logger.error("S3 client not available")
                 return False
@@ -109,7 +108,7 @@ class NYLUnderwritingAgent:
             
             logger.info(f"Processing {request_type} request for session {session_id}")
             
-            # Route to appropriate handler
+           
             if request_type == 'create_session':
                 return self.handle_create_session(payload)
             elif request_type == 's3_process':
@@ -157,7 +156,7 @@ class NYLUnderwritingAgent:
                         'session_id': session_id,
                         'created_at': datetime.now().isoformat(),
                         'status': 'initialized',
-                        'folder_purpose': 'Session folder for NYL underwriting documents and status'
+                        'folder_purpose': 'Session folder for Trianz underwriting documents and status'
                     }, indent=2),
                     ContentType='application/json'
                 )
@@ -622,7 +621,7 @@ Execute comprehensive underwriting workflow for all extracted documents.
                     check_system_status()
                     return {
                         'status': 'success',
-                        'message': 'NYL Underwriting System operational in AgentCore with hybrid local-cloud support',
+                        'message': 'Trianz Underwriting & Policy Generation System operational in AgentCore with hybrid local-cloud support',
                         'system_info': {
                             'platform': 'AWS AgentCore',
                             'agents_available': 8,
@@ -651,7 +650,7 @@ Execute comprehensive underwriting workflow for all extracted documents.
             # Default response
             return {
                 'status': 'success',
-                'message': 'NYL Underwriting System ready for hybrid local-cloud processing',
+                'message': 'Trianz Underwriting & policy generation system ready for hybrid local-cloud processing',
                 'usage_instructions': {
                     'create_session': 'Create new session: {"request_type": "create_session"}',
                     's3_process': 'Process documents from S3: {"request_type": "s3_process", "s3_bucket": "bucket", "s3_key": "session_id/file.zip", "session_id": "session-id"}',
@@ -675,37 +674,36 @@ Execute comprehensive underwriting workflow for all extracted documents.
             logger.error(f"General query error: {e}")
             return {'status': 'error', 'error': str(e)}
 
-# Initialize the agent
-nyl_agent = NYLUnderwritingAgent()
+
+trianz_agent = UnderwritingAgent()
 
 @app.entrypoint
 def invoke(payload: Dict[str, Any]) -> Dict[str, Any]:
-    """Enhanced AgentCore entrypoint for hybrid NYL Underwriting System"""
+    """Enhanced AgentCore entrypoint for hybrid  Underwriting System"""
     
     logger.info(f"AgentCore invoke called with payload: {payload}")
     
     try:
-        # Handle different payload formats from AgentCore
+        
         actual_payload = payload
         
-        # Check if payload is wrapped in 'message' key
+       
         if "message" in payload and isinstance(payload["message"], str):
             message = payload["message"]
             logger.info(f"Processing message: {message}")
             
             try:
-                # Try parsing as JSON
                 actual_payload = json.loads(message)
                 logger.info(f"Successfully parsed JSON payload: {actual_payload}")
             except json.JSONDecodeError:
                 logger.info("Direct JSON parsing failed, attempting manual parsing...")
                 
-                # Manual parsing for malformed JSON
+                
                 try:
-                    # Extract key-value pairs
+                    
                     parsed = {}
                     
-                    # Common patterns
+                   
                     patterns = {
                         'request_type': r'request_type["\']?\s*:\s*["\']?([^,}"\'\s]+)',
                         'session_id': r'session_id["\']?\s*:\s*["\']?([^,}"\'\s]+)',
@@ -723,15 +721,15 @@ def invoke(payload: Dict[str, Any]) -> Dict[str, Any]:
                         actual_payload = parsed
                         logger.info(f"Manual parsing successful: {actual_payload}")
                     else:
-                        # Treat as general query
+                       
                         actual_payload = {"prompt": message}
                         
                 except Exception as parse_error:
                     logger.warning(f"All parsing attempts failed: {parse_error}")
                     actual_payload = {"prompt": message}
         
-        # Process through the agent
-        result = nyl_agent.process_request(actual_payload)
+        
+        result = trianz_agent.process_request(actual_payload)
         
         logger.info(f"Request processed with status: {result.get('status', 'unknown')}")
         return result
@@ -751,5 +749,5 @@ def invoke(payload: Dict[str, Any]) -> Dict[str, Any]:
         }
 
 if __name__ == "__main__":
-    logger.info("Starting NYL Underwriting AgentCore application with hybrid local-cloud support...")
+    logger.info("Starting Trianz Underwriting & Policy Generation AgentCore application with hybrid local-cloud support...")
     app.run()
